@@ -17,7 +17,7 @@
     "src/loader/index.js",
     "src/loader/loader-helpers.js",
     "src/rcc/rcc-core.js",
-    "src/rcc/rcc-helper.ts"
+    "src/rcc/rcc-creator.tsx"
   ],
   "engines": {
     "node": ">=10"

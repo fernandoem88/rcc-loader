@@ -1,31 +1,11 @@
 import React from 'react'
+import { BooleanProp, ComponentData, PropType, TernaryProp } from 'types'
 import { addHTMLTags } from './addHTMLTags'
-
 import {
-  findComponentPropsMap,
+  checkRecursiveExtensions,
   findComponentKeys,
-  checkRecursiveExtensions
+  findComponentPropsMap
 } from './regex-helper'
-
-interface BooleanProp {
-  type: 'boolean'
-  key: string
-}
-
-interface TernaryProp {
-  type: 'ternary'
-  values: { [Value: string]: { key: string } }
-}
-
-type PropType = BooleanProp | TernaryProp
-
-interface ComponentData {
-  extensions: string[]
-  props: { [PropName: string]: PropType }
-  legacy: {
-    [Prop: string]: { parentNames: string[] }
-  }
-}
 
 const IS_DEV = process.env.node_env === 'development'
 
@@ -251,7 +231,7 @@ export const createRccHelper = <S,>(
       const classNamesRef = React.useRef({ ...emptyCssProps })
       const className = getComponentActiveClassNames(
         props,
-        componentName,
+        componentName as string,
         propsKeys,
         classNamesRef
       )

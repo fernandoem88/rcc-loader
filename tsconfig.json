@@ -18,9 +18,7 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "allowSyntheticDefaultImports": true,
-    "baseUrl": "./",
-    "paths": { "@/*": ["./*"] },
-    "types": ["./src/typings", "node"],
+    "types": ["node"],
     "typeRoots": ["./src/typings", "/node_modules/@types"]
   },
   "include": ["src"],
