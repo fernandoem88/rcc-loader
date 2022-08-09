@@ -98,8 +98,7 @@ function rccLoader(content /*, map, meta*/) {
     ? ''
     : helpers.createStringContent([
         `\n${componentsPropsDefinition}${gcpTypeDef}`,
-        '\nconst helper = createRccHelper as typeof H',
-        'const createRCC = helper(style, {',
+        'const createRCC = createRccHelper(style, {',
         ` prefix: "S."`,
         '});',
         '\nconst cssComponents = {',
@@ -112,8 +111,7 @@ function rccLoader(content /*, map, meta*/) {
   const rccImport = exportStyleOnly
     ? ''
     : helpers.createStringContent([
-        `import { createRccHelper } from "rcc-loader/dist/rcc-core";`,
-        `\nimport { createRccHelper as H } from "rcc-loader/dist/rcc/rcc-creator";\n`
+        `import { createRccHelper } from 'rcc-loader/dist/rcc-core';\n`
       ])
 
   return utils.fs.writeFileSync(

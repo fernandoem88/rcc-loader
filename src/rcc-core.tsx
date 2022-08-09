@@ -1,11 +1,11 @@
 import React from 'react'
 import { BooleanProp, ComponentData, PropType, TernaryProp } from 'types'
-import { addHTMLTags } from './addHTMLTags'
+import { addHTMLTags } from './rcc/addHTMLTags'
 import {
   checkRecursiveExtensions,
   findComponentKeys,
   findComponentPropsMap
-} from './regex-helper'
+} from './rcc/regex-helper'
 
 const IS_DEV = process.env.node_env === 'development'
 

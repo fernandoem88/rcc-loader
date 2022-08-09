@@ -1,5 +1,7 @@
 # React css components loader (rcc-loader)
 
+[![NPM](https://img.shields.io/npm/v/rcc-loader.svg)](https://www.npmjs.com/package/rcc-loader)
+
 > This loader is built to generate types from an imported css module and map its classes into react components in order to use props instead of classNames.
 >
 > - **fast classNames mapping**
@@ -111,8 +113,6 @@ const MyComponent = ({ isDarkMode }: { isDarkMode: boolean }) => {
   )
 }
 ```
-
-[![NPM](https://img.shields.io/npm/v/rcc-loader.svg)](https://www.npmjs.com/package/rcc-loader)
 
 ## how to Install
 

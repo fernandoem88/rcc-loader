@@ -7,7 +7,7 @@
     "email": "vs_fernando@yahoo.fr",
     "url": "https://github.com/fernandoem88"
   },
-  "description": "use react hooks in callbacks to take out noisy, useless or repetitive hooks from your components body",
+  "description": "react css components - easy way to use css module with react components",
   "license": "MIT",
   "repository": "https://github.com/fernandoem88/rcc-loader",
   "module": "dist/index.modern.js",
@@ -16,14 +16,14 @@
   "source": [
     "src/loader/index.js",
     "src/loader/loader-helpers.js",
-    "src/rcc/rcc-core.js",
-    "src/rcc/rcc-creator.tsx"
+    "src/rcc-core.js",
+    "src/rcc-core.tsx"
   ],
   "engines": {
     "node": ">=10"
   },
   "scripts": {
-    "build": "microbundle-crl --no-compress --format modern,cjs",
+    "build": "microbundle-crl --no-compress --format cjs",
     "start": "microbundle-crl watch --no-compress --format modern,cjs",
     "prepare": "run-s build",
     "test": "run-s test:unit test:lint test:build",
