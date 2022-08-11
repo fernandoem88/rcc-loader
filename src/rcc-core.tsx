@@ -1,5 +1,12 @@
 import React from 'react'
-import { BooleanProp, ComponentData, PropType, TernaryProp } from 'types'
+import {
+  BooleanProp,
+  ComponentData,
+  PropType,
+  RCC,
+  TaggedRCC,
+  TernaryProp
+} from 'types'
 import { addHTMLTags } from './rcc/addHTMLTags'
 import {
   checkRecursiveExtensions,
@@ -264,4 +271,20 @@ export const createRccHelper = <S,>(
   }
 
   return createComponentElement
+}
+
+export const toRCC = (style: any) => {
+  const createRCC = createRccHelper(style)
+
+  const search = Object.keys(style).join('\n') // multilines
+  const componentsKeys = findComponentKeys(search)
+
+  return Object.keys(componentsKeys).reduce((prev: any, componentName: any) => {
+    prev[componentName] = createRCC<any>(componentName)
+    return prev
+  }, {}) as {
+    [key: string]: RCC<any> & {
+      [K in keyof JSX.IntrinsicElements]: TaggedRCC<Omit<any, '$as'>, K>
+    }
+  }
 }

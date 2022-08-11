@@ -6,6 +6,7 @@
 >
 > - **fast classNames mapping**
 > - **easy to debug in React dev tools**
+> - **typed css style**
 
 ## Example
 
@@ -55,7 +56,6 @@ the loader will generate the following file _my-app.rcc.tsx_.
 import { createRccHelper } from 'rcc-loader/dist/rcc-core'
 import _style from './my-app.module.scss'
 
-// note: DeleteBtn_ext_Btn is not present in the interface
 export interface ModuleStyle {
   Root: string
   'Root--dark-mode': string
@@ -67,6 +67,7 @@ export interface ModuleStyle {
   'DeleteBtn--disabled': string
 }
 
+// set exportStyleOnly to true in the loader config to export only the style
 export const style: ModuleStyle = _style as any
 
 export interface RootProps {
@@ -76,7 +77,7 @@ export interface RootProps {
 export interface BtnProps {
   $size?: 'sm' | 'md' | 'lg'
 }
-// note: DeleteBtnProps extends BtnProps because we defined the class .DeleteBtn_ext_Btn
+// DeleteBtnProps extends BtnProps because we defined the class .DeleteBtn_ext_Btn
 export interface DeleteBtnProps extends BtnProps {
   $disabled?: boolean
 }
@@ -171,23 +172,26 @@ const nextConfig = {
 }
 ```
 
-after the set up complete, we need first to use the css module we want to generate rcc files from.
-
-for example in our component _MyComponent.tsx_
+after setting up the config, we will first use the **toRCC** transformer in our react component. for example in _MyComponent.tsx_
 
 ```tsx
-import style from './root.module.scss'
+import { toRCC } from 'rcc-loader/dist/rcc-core'
+import style from './my-style.module.scss'
+
+// S type is an index { [key: string]: RCC }
+const S = toRCC(style)
 
 export const MyComponent = () => {
-  // after compiling the css module, the rcc file will be generated automatically at the same folder level
-  return <div className={style.Root}>Hello World</div>
+  // after compiling the project, the my-style.rcc.tsx file will be generated automatically
+  return <S.Root.div>Hello World</S.Root.div>
 }
 ```
 
-now we can import the style.rcc.tsx file in our component and remove the css module
+now we can import the rcc components directly from the generated file
 
 ```tsx
-import S from './root.rcc'
+// now S is fully typed
+import S from './my-style.rcc'
 
 export const MyComponent = () => {
   return <S.Root.div>Hello World</S.Root.div>

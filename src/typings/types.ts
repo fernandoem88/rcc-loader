@@ -1,4 +1,5 @@
 declare module 'types' {
+  import { ComponentProps, ElementType } from 'react'
   // import { StringOptions } from 'sass'
 
   // export interface BaseOptions {
@@ -70,4 +71,15 @@ declare module 'types' {
       [Prop: string]: { parentNames: string[] }
     }
   }
+
+  export type RCC<Props> = <
+    Tag extends ElementType = 'div' // keyof JSX.IntrinsicElements | React.FC = "div"
+  >(
+    props: Props & { $as?: Tag } & ComponentProps<Tag>
+  ) => JSX.Element
+
+  export type TaggedRCC<
+    Props,
+    Tag extends ElementType // keyof JSX.IntrinsicElements | React.FC
+  > = (props: Props & ComponentProps<Tag>) => JSX.Element
 }
