@@ -6,7 +6,7 @@ import {
   RCC,
   TaggedRCC,
   TernaryProp
-} from 'rcc-types'
+} from './typings'
 import { addHTMLTags } from './rcc/addHTMLTags'
 import {
   checkRecursiveExtensions,
