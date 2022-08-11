@@ -1,5 +1,5 @@
 import React from 'react'
-import { RCC, TaggedRCC } from 'types'
+import { RCC, TaggedRCC } from 'rcc-types'
 import { EMPTY_HTML_TAGS, EMPTY_SVG_TAGS } from './constants'
 
 const isHTMLTag = (tag: string) =>

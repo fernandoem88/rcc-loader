@@ -1,4 +1,4 @@
-declare module 'types' {
+declare module 'rcc-types' {
   import { ComponentProps, ElementType } from 'react'
   // import { StringOptions } from 'sass'
 
