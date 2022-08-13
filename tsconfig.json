@@ -18,8 +18,15 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "allowSyntheticDefaultImports": true,
-    "types": ["node"],
-    "typeRoots": ["./src/typings", "/node_modules/@types"]
+    "types": ["node", "mocha"],
+    "typeRoots": ["./src/typings", "/node_modules/@types"],
+    "target": "es5",
+    "skipLibCheck": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true
   },
   "include": ["src"],
   "exclude": ["node_modules", "dist", "example"]

@@ -6,7 +6,7 @@
 >
 > - **fast classNames mapping**
 > - **easy to debug in React dev tools**
-> - **typed css style**
+> - **typed css module classNames**
 
 ## Example
 
@@ -67,7 +67,7 @@ export interface ModuleStyle {
   'DeleteBtn--disabled': string
 }
 
-// set exportStyleOnly to true in the loader config to export only the style
+// set exportStyleOnly to true in the webpack config to export only the style
 export const style: ModuleStyle = _style as any
 
 export interface RootProps {
@@ -123,7 +123,7 @@ npm i -S rcc-loader
 
 ## use and options
 
-Configuration example with nextjs
+see default Configuration example with nextjs
 
 ```ts
 const nextConfig = {
@@ -138,27 +138,40 @@ const nextConfig = {
         {
           loader: 'rcc-loader',
           options: {
-            // enabled: (required) the loader should be enabled only in Dev environment.
-            // alternatively you can just, add the rccLoaderRule to webpack only in dev and set enabled to true by default
-            enabled: !!dev, // should be true only in dev env,
+            /**
+             * enabled: (required) the loader should be enabled only in Dev environment.
+             * alternatively you can just, add the rccLoaderRule to webpack only in dev and set enabled to true by default
+            */
+            enabled: !!dev,
+            /**
+             * exportStyleOnly: (optional: boolean | Function), false by default. set it to true in case you want only to export the ModuleStyle from the generated file.
+             *  you can use a function in case you want to set it only for given modules or name templates
+             * eg: (filename, fileDir) => /-eso\.module\.scss$/.test(filename)
+             * in this case, my-style-eso.module.scss for example will export only the ModuleStyle type
+            **/
+            exportStyleOnly: false,
             // cache: (optional) the cache folder by default is .rcc-tmp
-            // we should add your cache folder name to the .gitignore file
+            // we should add the cache folder path to the .gitignore file
+            // after each css module compilation, rcc-loader checks cache values to decide if it should generate a new .rcc.tsx file or not
             cache: {
               folder: '.rcc-tmp',
-              // disabled: (Optional) - always generate new rcc file without caching
+              /**
+               * disabled: (Optional) - always generates new rcc file without checking the cache folder
+               * */
               disabled: false
             },
-            // exportStyleOnly: (optional), false by default. set it to true in case you want only to export the ModuleStyle from the generated file.
-            // you can use a function in case you want to set it only for given modules or name templates
-            // eg: (filename, fileDir) => /-eso\.module\.scss$/.test(filename)
-            exportStyleOnly: false,
-            // exportStyleOnly: (filename, fileDir) => /-eso\.module\.scss$/.test(filename)
             // getOutputFileName: (optional), to generate file with different name then the defualt one.
             getOutputFileName: (filename, fileDir) =>
               `awesomename-${filename.replace('.module.scss', '')}`,
             // sassOptions: (optional) - sassOptions to pass to sass compiler
-            // => sass.compileString(content, sassOptions). for example to resolve absolute imports, etc.
+            // => sass.compileString(cssString, sassOptions). for example to resolve absolute imports, etc.
             sassOptions: {}
+            // devDebugPrefix: (optional: string | function) - for dev environment, dom elements will have a data-kts-name attribute that will help for a fast look up in the project files. the default devDebugPrefix is S.
+            //let's assume we render <S.ContentWrapper.div /> in our project, the dom will have data-kts-name="S.ContentWrapper.div"
+            // we can have a dynamic prefix corresponding to our css module file.
+            // eg: (fileName, fileDir) => fileName.replace(".module.scss", ".")
+            // in this case, if our module file name is Overlay.module.scss, we wil then have data-kts-name="Overlay.ContentWrapper.div". etc.
+            devDebugPrefix: "S."
           }
         }
       ]
@@ -281,11 +294,11 @@ some times we define a bunch of classes and want to use only one at the time exc
   }
 }
 
-// we will have a global ternary prop
-// $font-size: which can accept one of ['sm', 'lg']
+// global ternary props
+// $font-size: 'sm' | 'lg'
 
-// the Btn component will have a ternary props (also the global props)
-// $color: ['green' | 'yellow'] including
+// Btn component own props
+// $color: 'green' | 'yellow'
 ```
 
 ## Component class extension

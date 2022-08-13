@@ -5,7 +5,7 @@ const helpers = require('./loader-helpers')
 
 const utils = { fs, path }
 
-function rccLoader(content /*, map, meta*/) {
+function rccLoader(content, map, meta) {
   const options = this.getOptions()
 
   if (!options.enabled) return
@@ -43,7 +43,7 @@ function rccLoader(content /*, map, meta*/) {
   classNamesArray.forEach((className) => {
     styleModuleType = helpers.createStyleType(className, styleModuleType)
     if (!exportStyleOnly) {
-      helpers.addComponentProps(className, components)
+      helpers.addParsedClassNameData(className, components)
     }
   })
 
@@ -94,12 +94,14 @@ function rccLoader(content /*, map, meta*/) {
     ? ''
     : helpers.getClassInterfacesDefinition(components)
 
+  const { devDebugPrefix = 'S.' } = options
+
   const rccContent = exportStyleOnly
     ? ''
     : helpers.createStringContent([
         `\n${componentsPropsDefinition}${gcpTypeDef}`,
         'const createRCC = createRccHelper(style, {',
-        ` prefix: "S."`,
+        ` prefix: "${devDebugPrefix}"`,
         '});',
         '\nconst cssComponents = {',
         `  ${rccComponentsImplementation}`,

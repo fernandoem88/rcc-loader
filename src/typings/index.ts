@@ -33,15 +33,15 @@ import { ComponentProps, ElementType } from 'react'
 
 // export type LoaderComponents = { [key: string]: LoaderComponentData }
 
-// export interface LoaderComponentData {
-//   props: { [key: string]: string }
-//   extensions: Set<string>
-//   // to help avoiding props duplications in the component interface
-//   classNamesMemo: Set<string>
-//   // { "$props-key": "Component--class-name" }
-//   classNamesPropsMapping: { [key: string]: any }
-//   hasProps: boolean
-// }
+export interface LoaderComponentData {
+  props: { [key: string]: any }
+  extensions: Set<string>
+  // to help avoiding props duplications in the component interface
+  classNamesMemo: Set<string>
+  // { "$props-key": "Component--class-name" }
+  classNamesPropsMapping: { [key: string]: any }
+  hasProps: boolean
+}
 
 // export interface FS {
 //   existsSync: (...args: any) => any

@@ -2,7 +2,7 @@ const fs = require('fs')
 const path = require('path')
 const sass = require('sass')
 
-function addComponentProps(className, components) {
+function addParsedClassNameData(className, components) {
   const [cn, ...propsKeys] = className.split('--')
   const componentName = cn || 'GlobalClass'
 
@@ -14,6 +14,10 @@ function addComponentProps(className, components) {
     }
 
     const { extensions } = components[childName]
+
+    components[parentName] = components[parentName] || {
+      ...getEmptyComponentData()
+    }
 
     extensions.add(parentName)
     return
@@ -96,7 +100,7 @@ function getClassInterfacesDefinition(components) {
     )
 
     let extensionString = Array.from(extensions)
-      .filter((ext) => !!components[ext].hasProps)
+      .filter((ext) => !!components[ext]?.hasProps)
       .map((extName) => `${extName}Props`)
       .join(', ')
     if (extensionString.trim()) {
@@ -111,7 +115,7 @@ function getClassInterfacesDefinition(components) {
 function getClassNamesFromCssString(cssString) {
   return Array.from(
     new Set(
-      cssString.match(/(?<=\.)((?!\.|\:|\/|,|\{|\(|\)|\}|\[|\]|\s).)+/gim) || []
+      cssString.match(/(?<=\.)((?!\.|:|\/|,|\{|\(|\)|\}|\[|\]|\s).)+/gim) || []
     )
   ).sort()
 }
@@ -271,7 +275,7 @@ function getShouldCompileFromCache({ classNames, options, resource, rootDir }) {
 }
 
 module.exports = {
-  addComponentProps,
+  addParsedClassNameData,
   createStringContent,
   createStyleType,
   getClassInterfacesDefinition,
