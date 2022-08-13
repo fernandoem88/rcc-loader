@@ -21,6 +21,7 @@ import { ComponentProps, ElementType } from 'react'
 //   // sassOptions: (optional) - sassOptions to pass to sass compiler
 //   // => sass.compileString(content, sassOptions). for example to resolve absolute imports, etc.
 //   sassOptions?: StringOptions<'sync'>
+//   devDebugPrefix?: string | (finename: string, fileDir: string) => string
 // }
 
 // export interface Options extends BaseOptions {
@@ -28,7 +29,6 @@ import { ComponentProps, ElementType } from 'react'
 //   _outputFileName: string
 //   _outputFilePath: string
 //   _logger: (...args: any) => any
-//   fs: FS
 // }
 
 // export type LoaderComponents = { [key: string]: LoaderComponentData }
@@ -42,14 +42,6 @@ export interface LoaderComponentData {
   classNamesPropsMapping: { [key: string]: any }
   hasProps: boolean
 }
-
-// export interface FS {
-//   existsSync: (...args: any) => any
-//   mkdirSync: (...args: any) => any
-//   readFileSync: (...args: any) => any
-//   unlink: (...args: any) => any
-//   writeFileSync: (...args: any) => any
-// }
 
 export interface BooleanProp {
   type: 'boolean'

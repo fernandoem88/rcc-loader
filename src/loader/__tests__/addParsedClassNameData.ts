@@ -1,4 +1,4 @@
-import helpers from '../../loader/loader-helpers'
+import helpers from '../loader-helpers'
 import { LoaderComponentData } from '../../typings'
 
 describe('parse and add className using addParsedClassNameData utility', () => {

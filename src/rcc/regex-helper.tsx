@@ -73,4 +73,5 @@ export const checkRecursiveExtensions = (
   extensions.forEach((parentName) => {
     checkRecursiveExtensions(parentName, components, [parentName, ...treeKeys])
   })
+  return true
 }

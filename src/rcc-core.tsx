@@ -117,7 +117,9 @@ export const createRccHelper = <S,>(
     Object.keys(componentsData).forEach((componentName) => {
       checkRecursiveExtensions(componentName, componentsData)
     })
-  } catch (e) {}
+  } catch (e) {
+    console.error(e)
+  }
 
   const getComponentPropsKeys = (componentName: string) => {
     const ccData = componentsData[componentName]

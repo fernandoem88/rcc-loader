@@ -1,4 +1,4 @@
-import helpers from '../../loader/loader-helpers'
+import helpers from '../loader-helpers'
 
 describe('cleanCssString and getClassNamesFromCssString utilities', () => {
   const cssString = `
