@@ -1,6 +1,6 @@
 {
   "name": "rcc-loader",
-  "version": "1.0.3-beta",
+  "version": "1.0.3",
   "homepage": "https://www.linkedin.com/in/fernando-ekutsu-mondele-67405484/",
   "author": {
     "name": "Fernando Ekutsu Mondele",
@@ -79,7 +79,8 @@
     "css",
     "components",
     "typescript",
-    "css-in-js"
+    "css-in-js",
+    "typed-css-module"
   ],
   "files": [
     "dist"

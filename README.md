@@ -343,8 +343,6 @@ if for some reason, we want to have some default props for all components in the
 }
 ```
 
-Note: this is a Beta version
-
 # License
 
 MIT © [https://github.com/fernandoem88/rcc-loader](https://github.com/fernandoem88/rcc-loader)
