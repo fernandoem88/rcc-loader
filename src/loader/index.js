@@ -24,6 +24,8 @@ function rccLoader(content, map, meta) {
     `${options._outputFileName}.rcc.tsx`
   )
 
+  options._devDebugPrefix = helpers.getDevDebugPrefix(this.resource, options)
+
   const exportStyleOnly = helpers.getExportStyleOnly(this.resource, options)
 
   const cssString = sass.compileString(content, options.sassOptions || {}).css
@@ -95,14 +97,12 @@ function rccLoader(content, map, meta) {
     ? ''
     : helpers.getClassInterfacesDefinition(components)
 
-  const { devDebugPrefix = 'S.' } = options
-
   const rccContent = exportStyleOnly
     ? ''
     : helpers.createStringContent([
         `\n${componentsPropsDefinition}${gcpTypeDef}`,
         'const createRCC = createRccHelper(style, {',
-        ` prefix: "${devDebugPrefix}"`,
+        ` prefix: "${options._devDebugPrefix}"`,
         '});',
         '\nconst cssComponents = {',
         `  ${rccComponentsImplementation}`,

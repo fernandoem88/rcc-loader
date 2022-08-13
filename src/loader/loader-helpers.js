@@ -170,6 +170,16 @@ function getEmptyComponentData() {
   }
 }
 
+function getDevDebugPrefix(resource, options) {
+  const { devDebugPrefix = '.S' } = options
+  if (typeof devDebugPrefix === 'function') {
+    const paths = resource.split('/')
+    const fileName = paths.pop()
+    return devDebugPrefix(fileName, paths.join('/'))
+  }
+  return devDebugPrefix
+}
+
 function getExportStyleOnly(resource, options) {
   const { exportStyleOnly = false } = options
   if (typeof exportStyleOnly === 'function') {
@@ -291,6 +301,7 @@ module.exports = {
   getClassNamesFromCssString,
   getComponentByName,
   getComponentPropertiesDef,
+  getDevDebugPrefix,
   getEmptyComponentData,
   getExportStyleOnly,
   getHasGlobalProps,
