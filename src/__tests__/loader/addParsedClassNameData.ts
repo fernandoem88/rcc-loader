@@ -9,7 +9,6 @@ describe('parse and add className using addParsedClassNameData utility', () => {
   it('should parse a simple className', () => {
     helpers.addParsedClassNameData('Btn--large-btn', components)
     expect(components.Btn).toBeDefined()
-
     expect(components.Btn.props['$large-btn']).toBeDefined()
     expect(components.Btn.classNamesPropsMapping['$large-btn']).toEqual(
       'Btn--large-btn'
@@ -21,7 +20,6 @@ describe('parse and add className using addParsedClassNameData utility', () => {
     helpers.addParsedClassNameData('Btn--lg_as_size', components)
 
     expect(components.Btn).toBeDefined()
-
     expect(components.Btn.props['$size']).toBeDefined()
     expect(components.Btn.classNamesPropsMapping['$size']).toBeDefined()
     expect(components.Btn.classNamesPropsMapping.$size.sm).toEqual(

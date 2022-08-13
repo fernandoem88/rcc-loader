@@ -1,6 +1,5 @@
 const fs = require('fs')
 const path = require('path')
-const sass = require('sass')
 
 function addParsedClassNameData(className, components) {
   const [cn, ...propsKeys] = className.split('--')
@@ -68,6 +67,23 @@ function addParsedClassNameData(className, components) {
   })
 }
 
+function cleanCssString(cssString) {
+  const separator = '_-||-_'
+  const cleanedCssString = cssString
+    // replace all new lines new lines with a special separator
+    .replaceAll(/(\r\n|\r|\n)/gi, separator)
+    // removing block comments /* */
+    .replaceAll(/\/\*.*\*\//gi, '')
+    // removing css attributes
+    .replaceAll(/\{.[^}]*\}/gi, ',')
+    // restore new line for .classes
+    .replaceAll(separator, '\n')
+    // removing inline comments //
+    .replaceAll(/\/\/.*/gi, '')
+
+  return cleanedCssString
+}
+
 function createStringContent(arr = [], separator = '\n') {
   return arr.join(separator)
 }
@@ -113,9 +129,12 @@ function getClassInterfacesDefinition(components) {
 }
 
 function getClassNamesFromCssString(cssString) {
+  const cleanedCssString = cleanCssString(cssString)
   return Array.from(
     new Set(
-      cssString.match(/(?<=\.)((?!\.|:|\/|,|\{|\(|\)|\}|\[|\]|\s).)+/gim) || []
+      cleanedCssString.match(
+        /(?<=\.)((?!\.|:|\/|,|\{|\(|\)|\}|\[|\]|\s).)+/gim
+      ) || []
     )
   ).sort()
 }
@@ -129,25 +148,14 @@ function getComponentByName(components, componentName) {
 }
 
 function getComponentPropertiesDef(props, classNamesPropsMapping) {
-  const propsContent = Object.entries(props).reduce((prevProps, propEntry) => {
-    const [propKey, propType] = propEntry
-    const newLine = '\n  '
-    const quoteKey = propKey.includes('-') ? `"${propKey}"` : propKey
-    return `${prevProps}${newLine}${quoteKey}?: ${propType};`
-  }, '')
+  const propsContent = Object.entries(props)
+    .map((propEntry) => {
+      const [propKey, propType] = propEntry
+      const quoteKey = propKey.includes('-') ? `"${propKey}"` : propKey
+      return `\n  ${quoteKey}?: ${propType};`
+    })
+    .join('')
   return propsContent
-}
-
-function getCssString(content, options) {
-  const cssString = sass.compileString(content, options.sassOptions || {}).css
-  const cleanedCssString = cssString
-    // removing new lines but only if not followed by a dot
-    .replaceAll(/(\r\n|\r|\n)(?!\.)/gi, ' ')
-    // removing comments // or /* */
-    .replaceAll(/\/\*.*\*\/|\/\/.*/gi, '')
-    // removing attributes
-    .replaceAll(/\{.*\}/gi, ',')
-  return cleanedCssString
 }
 
 function getEmptyComponentData() {
@@ -276,13 +284,13 @@ function getShouldCompileFromCache({ classNames, options, resource, rootDir }) {
 
 module.exports = {
   addParsedClassNameData,
+  cleanCssString,
   createStringContent,
   createStyleType,
   getClassInterfacesDefinition,
   getClassNamesFromCssString,
   getComponentByName,
   getComponentPropertiesDef,
-  getCssString,
   getEmptyComponentData,
   getExportStyleOnly,
   getHasGlobalProps,

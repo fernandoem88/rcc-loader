@@ -1,5 +1,6 @@
 const fs = require('fs')
 const path = require('path')
+const sass = require('sass')
 
 const helpers = require('./loader-helpers')
 
@@ -25,7 +26,7 @@ function rccLoader(content, map, meta) {
 
   const exportStyleOnly = helpers.getExportStyleOnly(this.resource, options)
 
-  const cssString = helpers.getCssString(content, options)
+  const cssString = sass.compileString(content, options.sassOptions || {}).css
   const classNamesArray = helpers.getClassNamesFromCssString(cssString)
 
   const shouldCompile = helpers.getShouldCompileFromCache({
