@@ -171,6 +171,8 @@ export const createRccHelper = <S,>(
 
     const cData = componentsData[componentName]
 
+    if (!cData) return ''
+
     const parentsClassName = cData.extensions
       .map((parent) => style[parent])
       .join(' ')

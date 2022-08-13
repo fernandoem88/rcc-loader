@@ -52,12 +52,14 @@ describe('css module style parser utils', () => {
         Btn: { extensions: [root] }
       })
     }).toThrowError()
+
     expect(() => {
       checkRecursiveExtensions(root, {
         Btn: { extensions: ['BaseBtn'] },
         BaseBtn: { extensions: [root] }
       })
     }).toThrowError()
+
     expect(() => {
       checkRecursiveExtensions(root, {
         Btn: { extensions: ['BaseBtn'] },
