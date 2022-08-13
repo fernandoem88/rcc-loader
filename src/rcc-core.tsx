@@ -277,8 +277,8 @@ export const createRccHelper = <S,>(
   return createComponentElement
 }
 
-export const toRCC = (style: any) => {
-  const createRCC = createRccHelper(style)
+export const toRCC = (style: any, options: { prefix?: string } = {}) => {
+  const createRCC = createRccHelper(style, options)
 
   const search = Object.keys(style).join('\n') // multilines
   const componentsKeys = findComponentKeys(search)
