@@ -14,7 +14,7 @@ import {
   findComponentPropsMap
 } from './rcc/regex-helper'
 
-const IS_DEV = process.env.node_env === 'development'
+const IS_DEV = process.env.NODE_ENV === 'development'
 
 export const createRccHelper = <S,>(
   style: S,
