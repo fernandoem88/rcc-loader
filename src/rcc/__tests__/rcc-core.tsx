@@ -4,12 +4,18 @@ import { createRccHelper } from '../../rcc-core'
 const styleArr = [
   'Wrapper',
   'Wrapper--dark-mode',
+  'BaseBtn',
+  'BaseBtn--size',
+  'Btn_ext_BaseBtn',
   'Btn',
   'Btn--sm_as_size',
   'Btn--lg_as_size',
+
   'DeleteBtn',
   'DeleteBtn_ext_Btn',
-  'DeleteBtn--border-radius-2px'
+  'DeleteBtn--border-radius-2px',
+  '--fs-12px_as_font-size',
+  '--fs-15px_as_font-size'
 ]
 
 describe('', () => {
@@ -21,7 +27,7 @@ describe('', () => {
   const S = {
     Wrapper: createRCC<{ 'dark-mode'?: boolean }>('Wrapper'),
     Btn: createRCC<{ $size?: 'sm' | 'lg' }>('Btn'),
-    DeleteBtn: createRCC<any>('DeleteBtn')
+    DeleteBtn: createRCC<{ 'border-radius-2px'?: boolean }>('DeleteBtn')
   }
   it('should render Wrapper component with the correct classname', async () => {
     render(<S.Wrapper>I am a wrapper</S.Wrapper>)
@@ -77,5 +83,32 @@ describe('', () => {
     expect(lgBtn.className).toContain('Btn')
     expect(lgBtn.className).toContain('Btn--lg_as_size')
     expect(lgBtn.className.includes('Btn--sm_as_size')).toBeFalsy()
+  })
+
+  it('should handle extension props properly', async () => {
+    render(
+      <>
+        <S.Btn.button>I am a button</S.Btn.button>
+        <S.Btn.button $size='lg'>button with size</S.Btn.button>
+      </>
+    )
+    const btn = await screen.findByText('I am a button')
+    expect(btn.className).toContain('Btn')
+    // Btn extends BaseBtn so it should have also BaseBtn class
+    expect(btn.className).toContain('BaseBtn')
+    // BaseBtn size is false whenever Btn size is falsy
+    expect(btn.className.includes('BaseBtn--size')).toBeFalsy()
+
+    const btnWithSize = await screen.findByText('button with size')
+    expect(btnWithSize.className).toContain('Btn')
+    // Btn extends BaseBtn so it should have also BaseBtn class
+    expect(btnWithSize.className).toContain('BaseBtn')
+    expect(btnWithSize.className).toContain('Btn--lg_as_size')
+    // BaseBtn size is true whenever Btn size is truthy
+    expect(btnWithSize.className).toContain('BaseBtn--size')
+  })
+
+  it('should handle global props properly', () => {
+    // TODO
   })
 })
