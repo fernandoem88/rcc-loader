@@ -253,6 +253,7 @@ function getShouldCompileFromCache({ classNames, options, resource, rootDir }) {
   const tmpFolder = options.cache?.folder ?? DEFAULT_CACHE_FOLDER
 
   const outputFileName = options._outputFileName
+  const devDebugPrefix = options._devDebugPrefix
   // const fileFolder = `${rootDir}/${tmpFolder}/rcc-cache/${filePaths.join("/")}`;
   const cacheFileFolder = path.resolve(
     rootDir,
@@ -269,9 +270,15 @@ function getShouldCompileFromCache({ classNames, options, resource, rootDir }) {
     const oldKeys = oldTmpObject.classNames.join(' ')
     const newKeys = classNames.join(' ')
     const isOutputFileNameEqual = oldTmpObject.outputFileName === outputFileName
-    const isExportStyleOnlySame =
+    const isExportStyleOnlyEqual =
       oldTmpObject.exportStyleOnly === exportStyleOnly
-    if (isOutputFileNameEqual && isExportStyleOnlySame && oldKeys === newKeys) {
+    const isDevPrefixEqual = oldTmpObject.devDebugPrefix === devDebugPrefix
+    if (
+      isDevPrefixEqual &&
+      isOutputFileNameEqual &&
+      isExportStyleOnlyEqual &&
+      oldKeys === newKeys
+    ) {
       return false
     }
 
@@ -286,7 +293,12 @@ function getShouldCompileFromCache({ classNames, options, resource, rootDir }) {
     fs.mkdirSync(cacheFileFolder, { recursive: true })
   }
 
-  const cacheData = { classNames, outputFileName, exportStyleOnly }
+  const cacheData = {
+    classNames,
+    devDebugPrefix,
+    outputFileName,
+    exportStyleOnly
+  }
   fs.writeFileSync(cacheFilePath, JSON.stringify(cacheData))
   console.log(resourceName, 'should compile ==', true)
   return true
