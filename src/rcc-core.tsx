@@ -18,7 +18,7 @@ const IS_DEV = process.env.NODE_ENV === 'development'
 
 export const createRccHelper = <S,>(
   style: S,
-  options?: { prefix?: string }
+  options?: { devDebugPrefix?: string }
 ) => {
   const search = Object.keys(style).join('\n') // multilines
 
@@ -232,7 +232,7 @@ export const createRccHelper = <S,>(
       return acc
     }, {})
 
-    const prefix = options?.prefix ?? ''
+    const devDebugPrefix = options?.devDebugPrefix ?? ''
 
     /**
      * @description CSSComponent
@@ -253,12 +253,11 @@ export const createRccHelper = <S,>(
       const Element = tag
 
       const dataProps = IS_DEV
-        ? { 'data-kts-name': `${prefix}${componentName}${suffix}` }
+        ? { 'data-kts-name': `${devDebugPrefix}${componentName}${suffix}` }
         : {}
 
       return (
         <Element
-          // data-kts-name={`${prefix}${componentName}${suffix}`}
           {...dataProps}
           {...rest}
           {...emptyCssProps}
@@ -270,14 +269,17 @@ export const createRccHelper = <S,>(
       )
     })
 
-    CSSComponent.displayName = `${prefix}${componentName}`
+    CSSComponent.displayName = `${devDebugPrefix}${componentName}`
     return addHTMLTags<Props>(CSSComponent as any)
   }
 
   return createComponentElement
 }
 
-export const toRCC = (style: any, options: { prefix?: string } = {}) => {
+export const toRCC = (
+  style: any,
+  options: { devDebugPrefix?: string } = {}
+) => {
   const createRCC = createRccHelper(style, options)
 
   const search = Object.keys(style).join('\n') // multilines

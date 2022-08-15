@@ -102,7 +102,7 @@ function rccLoader(content, map, meta) {
     : helpers.createStringContent([
         `\n${componentsPropsDefinition}${gcpTypeDef}`,
         'const createRCC = createRccHelper(style, {',
-        ` prefix: "${options._devDebugPrefix}"`,
+        ` devDebugPrefix: "${options._devDebugPrefix}"`,
         '});',
         '\nconst cssComponents = {',
         `  ${rccComponentsImplementation}`,
@@ -110,12 +110,11 @@ function rccLoader(content, map, meta) {
         '\nexport default cssComponents;'
       ])
 
-  const styleImport = `import _style from "./${resourceFileName}";`
   const rccImport = exportStyleOnly
     ? ''
-    : helpers.createStringContent([
-        `import { createRccHelper } from 'rcc-loader/dist/rcc-core';\n`
-      ])
+    : `import { createRccHelper } from 'rcc-loader/dist/rcc-core';\n`
+
+  const styleImport = `import _style from "./${resourceFileName}";`
 
   return utils.fs.writeFileSync(
     options._outputFilePath,
