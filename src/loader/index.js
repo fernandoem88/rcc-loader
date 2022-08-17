@@ -124,6 +124,4 @@ function rccLoader(content, map, meta) {
   )
 }
 
-// export default rccLoader
-
 module.exports = rccLoader

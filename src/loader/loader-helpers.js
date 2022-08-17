@@ -236,7 +236,10 @@ function getNewFileName(resource, options) {
   if (options.getOutputFileName) {
     return options.getOutputFileName(fileName, paths.join('/'))
   }
-  const newFileName = fileName.replace(/(\.module)?\.(c|le|scss|sass)/g, '.rcc')
+  const newFileName = fileName.replace(
+    /(\.module)?\.(css|less|scss|sass)/g,
+    '.rcc'
+  )
   return newFileName
 }
 
