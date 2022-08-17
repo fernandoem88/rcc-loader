@@ -83,7 +83,7 @@ export interface DeleteBtnProps extends BtnProps {
 }
 
 const createRCC = createRccHelper(style, {
-  prefix: 'S.'
+  devDebugPrefix: 'S.'
 })
 
 const cssComponents = {

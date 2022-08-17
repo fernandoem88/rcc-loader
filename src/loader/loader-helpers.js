@@ -171,7 +171,7 @@ function getEmptyComponentData() {
 }
 
 function getDevDebugPrefix(resource, options) {
-  const { devDebugPrefix = '.S' } = options
+  const { devDebugPrefix = 'S.' } = options
   if (typeof devDebugPrefix === 'function') {
     const paths = resource.split('/')
     const fileName = paths.pop()

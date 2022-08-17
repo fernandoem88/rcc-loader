@@ -232,7 +232,7 @@ export const createRccHelper = <S,>(
       return acc
     }, {})
 
-    const devDebugPrefix = options?.devDebugPrefix ?? ''
+    const devDebugPrefix = options?.devDebugPrefix ?? 'S.'
 
     /**
      * @description CSSComponent
