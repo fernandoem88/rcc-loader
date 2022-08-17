@@ -97,12 +97,14 @@ function rccLoader(content, map, meta) {
     ? ''
     : helpers.getClassInterfacesDefinition(components)
 
+  const rccSeparator = !!componentsPropsDefinition || !!gcpTypeDef ? '\n' : ''
+
   const rccContent = exportStyleOnly
     ? ''
     : helpers.createStringContent([
-        `\n${componentsPropsDefinition}${gcpTypeDef}`,
+        `${rccSeparator}${componentsPropsDefinition}${gcpTypeDef}`,
         'const createRCC = createRccHelper(style, {',
-        ` devDebugPrefix: "${options._devDebugPrefix}"`,
+        `  devDebugPrefix: "${options._devDebugPrefix}"`,
         '});',
         '\nconst cssComponents = {',
         `  ${rccComponentsImplementation}`,
