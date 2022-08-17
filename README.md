@@ -100,14 +100,19 @@ now we can use it in our main component _MyComponent.tsx_
 ```tsx
 import S from './my-app.rcc'
 
-const MyComponent = ({ isDarkMode }: { isDarkMode: boolean }) => {
+const MyComponent = ({
+  isDarkMode,
+  isDeleteDisabled
+}: {
+  isDarkMode: boolean
+}) => {
   return (
     // $as accepts html tags or react component
     <S.Root $as='div' $dark-mode={isDarkMode}>
       {/* if the browser supports proxy, we can directly define the html tag inline */}
       <S.Btn.button $size='sm'>I am a small button</S.Btn.button>
       <S.Btn.button $size='md'>I am a medium button</S.Btn.button>
-      <S.DeleteBtn.button $size='lg'>
+      <S.DeleteBtn.button $size='lg' $disabled={isDeleteDisabled}>
         I am a large Delete button
       </S.DeleteBtn.button>
     </S.Root>
@@ -142,7 +147,7 @@ const nextConfig = {
              * enabled: (required) the loader should be enabled only in Dev environment.
              * alternatively you can just, add the rccLoaderRule to webpack only in dev and set enabled to true by default
             */
-            enabled: !!dev,
+            enabled: !!dev && isServer,
             /**
              * exportStyleOnly: (optional: boolean | Function), false by default. set it to true in case you want only to export the ModuleStyle from the generated file.
              *  you can use a function in case you want to set it only for given modules or name templates
@@ -195,15 +200,14 @@ import style from './my-style.module.scss'
 const S = toRCC(style)
 
 export const MyComponent = () => {
-  // after compiling the project, the my-style.rcc.tsx file will be generated automatically
   return <S.Root.div>Hello World</S.Root.div>
 }
 ```
 
-now we can import the rcc components directly from the generated file
+after running the project, the _my-style.rcc.tsx_ file will be generated automatically so we can import the rcc components directly from it.
 
 ```tsx
-// now S is fully typed
+// here S is fully typed
 import S from './my-style.rcc'
 
 export const MyComponent = () => {

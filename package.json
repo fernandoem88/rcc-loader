@@ -1,13 +1,13 @@
 {
   "name": "rcc-loader",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "homepage": "https://www.linkedin.com/in/fernando-ekutsu-mondele-67405484/",
   "author": {
     "name": "Fernando Ekutsu Mondele",
     "email": "vs_fernando@yahoo.fr",
     "url": "https://github.com/fernandoem88"
   },
-  "description": "react css components - easy way to use css module with react components",
+  "description": "react css components loader - easy way to use css module in react components with typescript",
   "license": "MIT",
   "repository": "https://github.com/fernandoem88/rcc-loader",
   "module": "dist/index.modern.js",

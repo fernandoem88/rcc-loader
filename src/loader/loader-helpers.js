@@ -300,7 +300,6 @@ function getShouldCompileFromCache({ classNames, options, resource, rootDir }) {
     exportStyleOnly
   }
   fs.writeFileSync(cacheFilePath, JSON.stringify(cacheData))
-  console.log(resourceName, 'should compile ==', true)
   return true
 }
 
