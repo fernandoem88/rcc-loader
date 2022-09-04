@@ -16,7 +16,7 @@ import {
 
 const IS_DEV = process.env.NODE_ENV === 'development'
 
-export const createRccHelper = <S,>(
+export const createRccHelper = <S extends Record<string, string>>(
   style: S,
   options?: { devDebugPrefix?: string }
 ) => {
@@ -212,7 +212,7 @@ export const createRccHelper = <S,>(
         })
         .join(' ')
 
-      if (!!parentLegacyClassName) {
+      if (parentLegacyClassName) {
         jjClassNames.push(parentLegacyClassName)
       }
       const jjCN = jjClassNames.join(' ')

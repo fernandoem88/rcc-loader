@@ -1,6 +1,8 @@
 const fs = require('fs')
 const path = require('path')
 
+const pathSeparator = path.sep
+
 function addParsedClassNameData(className, components) {
   const [cn, ...propsKeys] = className.split('--')
   const componentName = cn || 'GlobalClass'
@@ -173,9 +175,9 @@ function getEmptyComponentData() {
 function getDevDebugPrefix(resource, options) {
   const { devDebugPrefix = 'S.' } = options
   if (typeof devDebugPrefix === 'function') {
-    const paths = resource.split('/')
+    const paths = resource.split(pathSeparator)
     const fileName = paths.pop()
-    return devDebugPrefix(fileName, paths.join('/'))
+    return devDebugPrefix(fileName, paths.join(pathSeparator))
   }
   return devDebugPrefix
 }
@@ -183,9 +185,9 @@ function getDevDebugPrefix(resource, options) {
 function getExportStyleOnly(resource, options) {
   const { exportStyleOnly = false } = options
   if (typeof exportStyleOnly === 'function') {
-    const paths = resource.split('/')
+    const paths = resource.split(pathSeparator)
     const fileName = paths.pop()
-    return exportStyleOnly(fileName, paths.join('/'))
+    return exportStyleOnly(fileName, paths.join(pathSeparator))
   }
   return exportStyleOnly
 }
@@ -231,10 +233,10 @@ function getHasOwnProps(components, componentName) {
  * @returns new file name without extension
  */
 function getNewFileName(resource, options) {
-  const paths = resource.split('/')
+  const paths = resource.split(pathSeparator)
   const fileName = paths.pop()
   if (options.getOutputFileName) {
-    return options.getOutputFileName(fileName, paths.join('/'))
+    return options.getOutputFileName(fileName, paths.join(pathSeparator))
   }
   const newFileName = fileName.replace(
     /(\.module)?\.(css|less|scss|sass)/g,
@@ -250,8 +252,10 @@ function getShouldCompileFromCache({ classNames, options, resource, rootDir }) {
     // will always compile and not cache result
     return true
   }
-  const filePaths = resource.replace(`${rootDir}/`, '').split('/')
-  const resourceName = filePaths.pop()
+  const filePaths = resource
+    .replace(`${rootDir}${pathSeparator}`, '')
+    .split(pathSeparator)
+  filePaths.pop() // removing resourceName
   const cacheFileName = `${getNewFileName(resource, options)}.rcc.json`
   const tmpFolder = options.cache?.folder ?? DEFAULT_CACHE_FOLDER
 
@@ -262,9 +266,9 @@ function getShouldCompileFromCache({ classNames, options, resource, rootDir }) {
     rootDir,
     tmpFolder,
     'rcc-cache',
-    filePaths.join('/')
+    filePaths.join(pathSeparator)
   )
-  const cacheFilePath = `${cacheFileFolder}/${cacheFileName}`
+  const cacheFilePath = `${cacheFileFolder}${pathSeparator}${cacheFileName}`
   const { exportStyleOnly = false } = options
 
   if (fs.existsSync(cacheFilePath)) {
@@ -286,13 +290,13 @@ function getShouldCompileFromCache({ classNames, options, resource, rootDir }) {
     }
 
     if (oldTmpObject.outputFileName && !isOutputFileNameEqual) {
-      const oldFilePath = `${cacheFileFolder}/${oldTmpObject.outputFileName}.rcc.tsx`
+      const oldFilePath = `${cacheFileFolder}${pathSeparator}${oldTmpObject.outputFileName}.rcc.tsx`
       if (fs.existsSync(oldFilePath)) {
         // delete old output .rcc.tsx file
         fs.unlink(oldFilePath)
       }
     }
-  } else if (!fs.existsSync(`${cacheFileFolder}/`)) {
+  } else if (!fs.existsSync(`${cacheFileFolder}${pathSeparator}`)) {
     fs.mkdirSync(cacheFileFolder, { recursive: true })
   }
 
