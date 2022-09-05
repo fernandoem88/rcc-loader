@@ -252,6 +252,7 @@ function getShouldCompileFromCache({ classNames, options, resource, rootDir }) {
     // will always compile and not cache result
     return true
   }
+
   const filePaths = resource
     .replace(`${rootDir}${pathSeparator}`, '')
     .split(pathSeparator)

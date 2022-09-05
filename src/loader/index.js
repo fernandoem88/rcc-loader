@@ -4,6 +4,8 @@ const sass = require('sass')
 
 const helpers = require('./loader-helpers')
 
+const pathSeparator = path.sep
+
 const utils = { fs, path }
 
 function rccLoader(content, map, meta) {
@@ -11,7 +13,7 @@ function rccLoader(content, map, meta) {
 
   if (!options.enabled) return
 
-  const paths = this.resource.split('/')
+  const paths = this.resource.split(pathSeparator)
   const resourceFileName = paths.pop()
 
   options._getFSModule = () => this.fs
@@ -20,7 +22,7 @@ function rccLoader(content, map, meta) {
   options._logger = this.getLogger()
 
   options._outputFilePath = utils.path.resolve(
-    paths.join('/'),
+    paths.join(pathSeparator),
     `${options._outputFileName}.rcc.tsx`
   )
 
