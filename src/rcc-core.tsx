@@ -16,7 +16,7 @@ import {
 
 const IS_DEV = process.env.NODE_ENV === 'development'
 
-export const createRccHelper = <S extends Record<string, string>>(
+export const createRccHelper = <S extends Record<string, any>>(
   style: S,
   options?: { devDebugPrefix?: string }
 ) => {
