@@ -245,24 +245,20 @@ function getNewFileName(resource, options) {
   return newFileName
 }
 
-const DEFAULT_CACHE_FOLDER = '.rcc-tmp'
-
 function getShouldCompileFromHash({ classNames, options, resource, rootDir }) {
-  
-
-  const esoHash = options.exportStyleOnly ? "#eso; " : ""
-  const cnHash = `#cn=${classNames.join("|")};`
+  const esoHash = options.exportStyleOnly ? '#eso; ' : ''
+  const cnHash = `#cn=${classNames.join('|')};`
   const prefixHash = `#pfx=${options._devDebugPrefix}; `
   const outputFilenameHash = `#ofn=${options._outputFileName}; `
   const newHash = `##hash## ${esoHash}${cnHash}${prefixHash}${outputFilenameHash}`
   if (fs.existsSync(options._outputFilePath)) {
     const fileContent = fs.readFileSync(options._outputFilePath, 'utf8')
-    const oldHash = fileContent.replaceAll(/(\r\n|\r|\n)/gi, "").replace(/.*##hash##/g, "##hash##")
+    const oldHash = fileContent
+      .replaceAll(/(\r\n|\r|\n)/gi, '')
+      .replace(/.*##hash##/g, '##hash##')
     return [oldHash !== newHash, newHash]
   }
   return [true, newHash]
-
-  
 }
 
 module.exports = {

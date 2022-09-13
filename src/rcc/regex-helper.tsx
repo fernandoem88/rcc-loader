@@ -1,3 +1,4 @@
+// return a dictionary of component keys which value is its extensions array
 export const findComponentKeys = (globalSearch: string) => {
   const componentsKeys: { [K: string]: { extensions: string[] } } = {}
   // starts with a-Z,

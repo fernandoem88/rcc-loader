@@ -43,23 +43,11 @@ export interface LoaderComponentData {
   hasProps: boolean
 }
 
-export interface BooleanProp {
-  type: 'boolean'
-  key: string
-}
-
-export interface TernaryProp {
-  type: 'ternary'
-  values: { [Value: string]: { key: string } }
-}
-
-export type PropType = BooleanProp | TernaryProp
-
 export interface ComponentData {
   extensions: string[]
-  props: { [PropName: string]: PropType }
+  propClassMapping: { [$prop: string]: string }
   legacy: {
-    [Prop: string]: { parentNames: string[] }
+    [$prop: string]: string[]
   }
 }
 
