@@ -33,7 +33,7 @@ function rccLoader(content, map, meta) {
   const cssString = sass.compileString(content, options.sassOptions || {}).css
   const classNamesArray = helpers.getClassNamesFromCssString(cssString)
 
-  const shouldCompile = helpers.getShouldCompileFromCache({
+  const [shouldCompile, hashTag] = helpers.getShouldCompileFromHash({
     classNames: classNamesArray,
     rootDir: this.rootContext,
     resource: this.resource,
@@ -122,7 +122,7 @@ function rccLoader(content, map, meta) {
 
   return utils.fs.writeFileSync(
     options._outputFilePath,
-    `${rccImport}${styleImport}${styleContent}${rccContent}\n`
+    `${rccImport}${styleImport}${styleContent}${rccContent}\n\n// ${hashTag}`
   )
 }
 

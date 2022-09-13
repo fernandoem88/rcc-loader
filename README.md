@@ -93,6 +93,9 @@ const cssComponents = {
 }
 
 export default cssComponents
+
+// the following line is used for caching purpose
+// ##hash## #eso #ext= #cn= #ofn
 ```
 
 now we can use it in our main component _MyComponent.tsx_
@@ -155,16 +158,7 @@ const nextConfig = {
              * in this case, my-style-eso.module.scss for example will export only the ModuleStyle type
             **/
             exportStyleOnly: false,
-            // cache: (optional) the cache folder by default is .rcc-tmp
-            // we should add the cache folder path to the .gitignore file
-            // after each css module compilation, rcc-loader checks cache values to decide if it should generate a new .rcc.tsx file or not
-            cache: {
-              folder: '.rcc-tmp',
-              /**
-               * disabled: (Optional) - always generates new rcc file without checking the cache folder
-               * */
-              disabled: false
-            },
+            
             // getOutputFileName: (optional), to generate file with different name then the defualt one.
             getOutputFileName: (filename, fileDir) =>
               `awesomename-${filename.replace('.module.scss', '')}`,

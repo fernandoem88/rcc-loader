@@ -247,68 +247,22 @@ function getNewFileName(resource, options) {
 
 const DEFAULT_CACHE_FOLDER = '.rcc-tmp'
 
-function getShouldCompileFromCache({ classNames, options, resource, rootDir }) {
-  if (options.cache?.disabled) {
-    // will always compile and not cache result
-    return true
+function getShouldCompileFromHash({ classNames, options, resource, rootDir }) {
+  
+
+  const esoHash = options.exportStyleOnly ? "#eso; " : ""
+  const cnHash = `#cn=${classNames.join("|")};`
+  const prefixHash = `#pfx=${options._devDebugPrefix}; `
+  const outputFilenameHash = `#ofn=${options._outputFileName}; `
+  const newHash = `##hash## ${esoHash}${cnHash}${prefixHash}${outputFilenameHash}`
+  if (fs.existsSync(options._outputFilePath)) {
+    const fileContent = fs.readFileSync(options._outputFilePath, 'utf8')
+    const oldHash = fileContent.replaceAll(/(\r\n|\r|\n)/gi, "").replace(/.*##hash##/g, "##hash##")
+    return [oldHash !== newHash, newHash]
   }
+  return [true, newHash]
 
-  const filePaths = resource
-    .replace(`${rootDir}${pathSeparator}`, '')
-    .split(pathSeparator)
-  filePaths.pop() // removing resourceName
-  const cacheFileName = `${getNewFileName(resource, options)}.rcc.json`
-  const tmpFolder = options.cache?.folder ?? DEFAULT_CACHE_FOLDER
-
-  const outputFileName = options._outputFileName
-  const devDebugPrefix = options._devDebugPrefix
-  // const fileFolder = `${rootDir}/${tmpFolder}/rcc-cache/${filePaths.join("/")}`;
-  const cacheFileFolder = path.resolve(
-    rootDir,
-    tmpFolder,
-    'rcc-cache',
-    filePaths.join(pathSeparator)
-  )
-  const cacheFilePath = `${cacheFileFolder}${pathSeparator}${cacheFileName}`
-  const { exportStyleOnly = false } = options
-
-  if (fs.existsSync(cacheFilePath)) {
-    const tmpFileString = fs.readFileSync(cacheFilePath, 'utf8')
-    const oldTmpObject = JSON.parse(tmpFileString)
-    const oldKeys = oldTmpObject.classNames.join(' ')
-    const newKeys = classNames.join(' ')
-    const isOutputFileNameEqual = oldTmpObject.outputFileName === outputFileName
-    const isExportStyleOnlyEqual =
-      oldTmpObject.exportStyleOnly === exportStyleOnly
-    const isDevPrefixEqual = oldTmpObject.devDebugPrefix === devDebugPrefix
-    if (
-      isDevPrefixEqual &&
-      isOutputFileNameEqual &&
-      isExportStyleOnlyEqual &&
-      oldKeys === newKeys
-    ) {
-      return false
-    }
-
-    if (oldTmpObject.outputFileName && !isOutputFileNameEqual) {
-      const oldFilePath = `${cacheFileFolder}${pathSeparator}${oldTmpObject.outputFileName}.rcc.tsx`
-      if (fs.existsSync(oldFilePath)) {
-        // delete old output .rcc.tsx file
-        fs.unlink(oldFilePath)
-      }
-    }
-  } else if (!fs.existsSync(`${cacheFileFolder}${pathSeparator}`)) {
-    fs.mkdirSync(cacheFileFolder, { recursive: true })
-  }
-
-  const cacheData = {
-    classNames,
-    devDebugPrefix,
-    outputFileName,
-    exportStyleOnly
-  }
-  fs.writeFileSync(cacheFilePath, JSON.stringify(cacheData))
-  return true
+  
 }
 
 module.exports = {
@@ -327,5 +281,5 @@ module.exports = {
   getHasLegacyProps,
   getHasOwnProps,
   getNewFileName,
-  getShouldCompileFromCache
+  getShouldCompileFromHash
 }
