@@ -71,23 +71,8 @@ export const createRccHelper = <S extends Record<string, any>>(
 
     componentsData[componentName] = {
       extensions,
-      propClassMapping: nthComponentPropClassMapping,
-      legacy: {}
+      propClassMapping: nthComponentPropClassMapping
     }
-    /*
-    extensions.forEach((extPar) => {
-      const parentData = componentsData[extPar]
-      const parentPropsNames = Object.keys(parentData?.props || {})
-      if (!parentPropsNames.length) {
-        // console.log("no data found for extended parent", extPar);
-        return
-      }
-      const propsLegacy = componentsData[componentName].legacy
-      parentPropsNames.forEach((propName) => {
-        propsLegacy[propName] = propsLegacy[propName] || { parentNames: [] }
-        propsLegacy[propName].parentNames.push(extPar)
-      })
-    })*/
   })
 
   try {
@@ -99,25 +84,6 @@ export const createRccHelper = <S extends Record<string, any>>(
     throw e
   }
 
-  const addLegacy = (componentName: string, parentName: string) => {
-    const childData = componentsData[componentName]
-    const parentData = componentsData[parentName]
-    Object.keys(parentData.propClassMapping).forEach(($prop) => {
-      childData.legacy[$prop] = childData.legacy[$prop] || []
-      childData.legacy[$prop].push(parentName)
-    })
-    parentData.extensions.forEach((ext) => {
-      addLegacy(componentName, ext)
-    })
-  }
-  Object.keys(componentsData).forEach((componentName) => {
-    const childData = componentsData[componentName]
-
-    childData.extensions.forEach((parentName) =>
-      addLegacy(componentName, parentName)
-    )
-  })
-
   const getComponentPropsKeys = (componentName: string) => {
     const ccData = componentsData[componentName]
     if (!ccData) {
@@ -125,12 +91,7 @@ export const createRccHelper = <S extends Record<string, any>>(
       return []
     }
 
-    const globalKeys = Object.keys(globalProps)
-    const ownKeys = Object.keys(ccData.propClassMapping)
-    const legacyKeys = Object.keys(ccData.legacy)
-    const propsKeys = Array.from(
-      new Set([...globalKeys, ...legacyKeys, ...ownKeys])
-    )
+    const propsKeys = Object.keys(ccData.propClassMapping)
 
     return propsKeys
   }
@@ -148,62 +109,17 @@ export const createRccHelper = <S extends Record<string, any>>(
   const getComponentActiveClassNames = (
     props: any,
     componentName: string,
-    propsKeys: string[],
-    previousClassNamesRef: React.MutableRefObject<{
-      [PropKey: string]: { propValue: string; className: string }
-    }>
+    propsKeys: string[]
   ) => {
-    const ref = previousClassNamesRef
-    const classNames: string[] = []
-    const ownClass = style[componentName]
-
-    // I should move this one out
-    !!ownClass && classNames.push(ownClass)
-    !!defaultClassName && classNames.push(defaultClassName)
-    //
-    !!props.className && classNames.push(props.className)
-
     const cData = componentsData[componentName]
 
-    if (!cData) return ''
+    if (!cData) return props.className
 
     return propsKeys.reduce((prevClassName, $prop) => {
       const propValue = props[$prop]
-      if (ref.current[$prop]?.propValue === propValue) {
-        const className = ref.current[$prop]?.className || ''
-        return prevClassName + ' ' + className
-      }
-      const cnLegacy = (cData.legacy[$prop] || []).reduce(
-        (prevClassNameLegacy, parent) => {
-          const mapping = componentsData[parent]?.propClassMapping || {}
-          const classNameLegacy = getClassNameByPropKey(
-            mapping,
-            $prop,
-            propValue
-          )
-          return classNameLegacy
-            ? prevClassNameLegacy + ' ' + classNameLegacy
-            : prevClassNameLegacy
-        },
-        ''
-      )
-      const globalClassName = getClassNameByPropKey(
-        globalProps,
-        $prop,
-        propValue
-      )
-      const ownClassName = getClassNameByPropKey(
-        cData.propClassMapping,
-        $prop,
-        propValue
-      )
-      const className = [prevClassName, ownClassName, cnLegacy, globalClassName]
-        .join(' ')
-        .trim()
-        .replace(/\s+/, ' ')
-      ref.current[$prop] = { propValue, className }
-      return className
-    }, classNames.join(' '))
+      const cn = getClassNameByPropKey(cData.propClassMapping, $prop, propValue)
+      return cn ? prevClassName + ' ' + cn : prevClassName
+    }, props.className || '')
   }
 
   const createComponentElement = <Props,>(componentName: string) => {
@@ -220,12 +136,10 @@ export const createRccHelper = <S extends Record<string, any>>(
      */
     const CSSComponent = React.forwardRef(function (props: any, ref) {
       const { $as = 'div', children, ...rest } = props
-      const classNamesRef = React.useRef({ ...emptyCssProps })
       const className = getComponentActiveClassNames(
         props,
         componentName as string,
-        propsKeys,
-        classNamesRef
+        propsKeys
       )
 
       const tag = typeof $as === 'string' ? $as : 'tag' in $as ? $as.tag : $as

@@ -5,7 +5,7 @@ const pathSeparator = path.sep
 
 function addParsedClassNameData(className, components) {
   const [cn, ...propsKeys] = className.split('--')
-  const componentName = cn || 'GlobalClass'
+  const componentName = cn || 'GlobalClasses'
 
   if (componentName.includes('_ext_')) {
     const [childName, parentName] = componentName.split('_ext_')
@@ -120,7 +120,7 @@ function getBaseComponentsDefinition(components) {
     const prevContent = prevContentDefinition
       ? `${prevContentDefinition}\n\n`
       : ''
-    return `${prevContent}const ${componentName} = (p: {${propsContent}}) => (<RCCElement {...p} rcc={${componentName}} />)${lastNewLine}`
+    return `${prevContent}const ${componentName} = (p: {${propsContent}}) => (<RCCElement {...p} rcc="${componentName}" />)${lastNewLine}`
   }, '')
 }
 
@@ -187,7 +187,7 @@ function getExportStyleOnly(resource, options) {
 }
 
 function getHasGlobalProps(components) {
-  return !!Object.keys(components.GlobalClass?.props ?? {}).length
+  return !!Object.keys(components.GlobalClasses?.props ?? {}).length
 }
 
 function getRecursiveErrorMessage({
@@ -196,11 +196,21 @@ function getRecursiveErrorMessage({
   root,
   treeKeys = [root]
 }) {
+  const { _resource } = options
   if (new Set(treeKeys).size !== treeKeys.length) {
-    console.log(`\nrecursive extensions in ${options._resource}`)
+    const errMsg1 = `recursive extensions in ${_resource.replace('\\', '/')}`
+    const loop = treeKeys.join(' ==> ')
     const errorMsg = createStringContent([
-      `\nconsole.error("recursive extensions in ${options._resource}")`,
-      `recursive extensions: ${treeKeys.join(' ==> ')}\n`
+      `import { toRCC } from "rcc-loader/dist/rcc-core"`,
+      `import _style from "${_resource.replace('\\', '/')}"`,
+      `\n// 1: Change your classes definition to avoid the following infinite loop:`,
+      `// ${loop}`,
+      `const errorMsg = "${errMsg1}"`,
+      `console.error(errorMsg)`,
+      '\n// 2: once done, remove the following line',
+      `throw new Error(errorMsg)`,
+      '\nexport const style = _style as any',
+      '\nexport default toRCC(_style as any)'
     ])
 
     throw new Error(errorMsg)

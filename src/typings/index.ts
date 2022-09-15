@@ -46,9 +46,6 @@ export interface LoaderComponentData {
 export interface ComponentData {
   extensions: string[]
   propClassMapping: { [$prop: string]: string }
-  legacy: {
-    [$prop: string]: string[]
-  }
 }
 
 export type RCC<Props> = <

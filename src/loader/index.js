@@ -42,7 +42,7 @@ function rccLoader(content, map, meta) {
 
   if (!shouldCompile) return
 
-  const components = { GlobalClass: helpers.getEmptyComponentData() }
+  const components = { GlobalClasses: helpers.getEmptyComponentData() }
 
   let styleModuleType = ''
   classNamesArray.forEach((className) => {
@@ -54,14 +54,17 @@ function rccLoader(content, map, meta) {
 
   try {
     Object.keys(components).forEach((root) =>
-      helpers.getRecursiveErrorMessage({ options, root, components })
+      helpers.getRecursiveErrorMessage({ options, root, components, hashTag })
     )
   } catch (error) {
-    return utils.fs.writeFileSync(options._outputFilePath, `${error.message}`)
+    return utils.fs.writeFileSync(
+      options._outputFilePath,
+      `${error.message}\n\n// ${hashTag}`
+    )
   }
 
   const hasGlobalProps = helpers.getHasGlobalProps(components)
-  components.GlobalClass.hasProps = hasGlobalProps
+  components.GlobalClasses.hasProps = hasGlobalProps
 
   const styleContent = helpers.createStringContent([
     '\n\nexport interface ModuleStyle {',
@@ -74,7 +77,7 @@ function rccLoader(content, map, meta) {
     ? ''
     : Object.entries(components).reduce((prev, entry) => {
         const [componentName, componentData] = entry
-        if (componentName === 'GlobalClass') {
+        if (componentName === 'GlobalClasses') {
           return prev
         }
 
@@ -94,7 +97,7 @@ function rccLoader(content, map, meta) {
       }, '')
 
   const gcpTypeDef = hasGlobalProps
-    ? '\n\ntype GCP<T> = T & GlobalClassProps;'
+    ? '\n\ntype GCP<T> = T & GlobalClassesProps;'
     : ''
 
   const componentsPropsDefinition = exportStyleOnly
