@@ -1,12 +1,5 @@
-import React from 'react'
-import {
-  BooleanProp,
-  ComponentData,
-  PropType,
-  RCC,
-  TaggedRCC,
-  TernaryProp
-} from './typings'
+import React, { useRef } from 'react'
+import { ComponentData, RCC, TaggedRCC } from './typings'
 import { addHTMLTags } from './rcc/addHTMLTags'
 import {
   checkRecursiveExtensions,
@@ -16,109 +9,63 @@ import {
 
 const IS_DEV = process.env.NODE_ENV === 'development'
 
-const BtnData = {
-  propsClassMapping: {
-    $size: 'Btn--[???]_as_size', // sm lg md...
-    $diabled: 'Btn--disabled'
-  },
-  lagacyProps: {}
+const getTag = ($as: string | { tag: any }) => {
+  const tag = typeof $as === 'string' ? $as : 'tag' in $as ? $as.tag : $as
+  return tag
 }
 
-const DeleteBtnData = {
-  propsClassMapping: {
-    $deleting: 'DeleteBtn--deleting',
-    $disabled: 'Btn--disabled'
-  },
-  lagacyProps: {
-    $size: ['Btn'], // flat extensions, not recursive
-    $disabled: ['Btn']
+const getCleanPropClassMapping = (propClassMap: [string, string]) => {
+  const [dirtyProp, className] = propClassMap
+  // const classKey = findClassKeyByClassName(search, componentkey, className);
+  const isWrongClass = dirtyProp.indexOf('_ext_') !== -1
+  if (isWrongClass) {
+    console.warn(`found a wrong class definition '${className}':
+        a React CSS Component classname should not contain the extension key '_ext_'.`)
+    return []
+  }
+
+  const isTernary = dirtyProp.indexOf('_as_') !== -1
+
+  if (isTernary) {
+    const [, ternaryName] = dirtyProp.split('_as_')
+    const $prop = `$${ternaryName}`
+    return [$prop, className.replace(ternaryName, '[?]')]
+  } else {
+    const $prop = `$${dirtyProp}`
+    return [$prop, className]
   }
 }
 
-const style = {} as any
-const getJJComponentData = (parent: any) => BtnData
-
-const getClassClassName = ($prop: any, value: any, data: any): string => {
-  const classKey = data.propsClassMapping[$prop].replace('[???]', value)
-  const cn = style[classKey]
-  const legacyCN = (data.lagacyProps[$prop] as any[]).map((parent: any) => {
-    const parentData = getJJComponentData(parent)
-    return getClassClassName($prop, value, parentData)
-  })
-  return [cn, ...legacyCN].join(' ')
-}
-
-export const createRccHelper = <S extends Record<string, any>>(
-  style: S,
+export const createRccHelper = (
+  style: any,
   options?: { devDebugPrefix?: string }
 ) => {
   const search = Object.keys(style).join('\n') // multilines
 
   const componentsData = {} as { [ComponentName: string]: ComponentData }
-  const globalProps = {} as { [PropName: string]: PropType }
+  const globalProps = {} as { [$props: string]: string }
   const componentsKeys = findComponentKeys(search)
 
   const globalClassNamesMap = findComponentPropsMap(search, '')
   // the default class is not a component property
   delete globalClassNamesMap.DEFAULT
-  const defaultClassName = style['--DEFAULT'] || ''
+  const defaultClassName = style['--DEFAULT'] ? style['--DEFAULT'] + ' ' : ''
 
   Object.entries(globalClassNamesMap).forEach((propClassMap) => {
-    const [dirtyProp, className] = propClassMap
-    // const key = findClassKeyByClassName(search, "", gcn);
-    const isTernary = dirtyProp.indexOf('_as_') !== -1
-    if (isTernary) {
-      const [ternaryValue, ternaryName] = dirtyProp.split('_as_')
-      const propsName = `$${ternaryName}`
-      globalProps[propsName] = globalProps[propsName] || {
-        values: {},
-        type: 'ternary'
-      }
-      const ternaryProp = globalProps[propsName] as TernaryProp
-      ternaryProp.values[ternaryValue] = { key: className }
-    } else {
-      const propsName = `$${dirtyProp}`
-      globalProps[propsName] = {
-        key: className,
-        type: 'boolean'
-      } as BooleanProp
+    const [$prop, $cn] = getCleanPropClassMapping(propClassMap)
+    if ($prop) {
+      globalProps[$prop] = $cn
     }
   })
 
   Object.keys(componentsKeys).forEach((componentName) => {
     const propsClassesMap = findComponentPropsMap(search, componentName)
-    const nthComponentProps = {}
+    const propClassMapping = {}
 
     Object.entries(propsClassesMap).forEach((propClassMap) => {
-      const [dirtyProp, className] = propClassMap
-      // const classKey = findClassKeyByClassName(search, componentkey, className);
-      const isWrongClass = dirtyProp.indexOf('_ext_') !== -1
-      if (isWrongClass) {
-        console.warn(`found a wrong class definition '${className}':
-        a React CSS Component classname should not contain the extension key '_ext_'.`)
-        return
-      }
-
-      const isTernary = dirtyProp.indexOf('_as_') !== -1
-
-      if (isTernary) {
-        const [ternaryValue, ternaryName] = dirtyProp.split('_as_')
-        const propsName = `$${ternaryName}`
-
-        nthComponentProps[propsName] = nthComponentProps[propsName] || {
-          type: 'ternary',
-          values: {}
-        }
-        nthComponentProps[propsName].values[ternaryValue] = {
-          key: className
-        }
-      } else {
-        const propsName = `$${dirtyProp}`
-
-        nthComponentProps[propsName] = {
-          type: 'boolean',
-          key: className
-        }
+      const [$prop, $cn] = getCleanPropClassMapping(propClassMap)
+      if ($prop) {
+        propClassMapping[$prop] = $cn
       }
     })
 
@@ -126,174 +73,93 @@ export const createRccHelper = <S extends Record<string, any>>(
 
     componentsData[componentName] = {
       extensions,
-      propClassMapping: nthComponentProps,
-      legacy: {}
+      propClassMapping
     }
-
-    extensions.forEach((extPar) => {
-      const parentData = componentsData[extPar]
-      const parentPropsNames = Object.keys(parentData?.props || {})
-      if (!parentPropsNames.length) {
-        // console.log("no data found for extended parent", extPar);
-        return
-      }
-      const propsLegacy = componentsData[componentName].legacy
-      parentPropsNames.forEach((propName) => {
-        propsLegacy[propName] = propsLegacy[propName] || { parentNames: [] }
-        propsLegacy[propName].parentNames.push(extPar)
-      })
-    })
   })
 
-  try {
-    Object.keys(componentsData).forEach((componentName) => {
-      checkRecursiveExtensions(componentName, componentsData)
-    })
-  } catch (e) {
-    console.error(e)
-  }
+  Object.keys(componentsData).forEach((componentName) => {
+    checkRecursiveExtensions(componentName, componentsData)
+  })
 
-  const getComponentPropsKeys = (componentName: string) => {
-    const ccData = componentsData[componentName]
-    if (!ccData) {
-      // console.log('empty props for component', componentName)
-      return []
-    }
+  const devDebugPrefix = options?.devDebugPrefix ?? 'S.'
 
-    const globalKeys = Object.keys(globalProps)
-    const ownKeys = Object.keys(ccData.props)
-    const legacyKeys = Object.keys(ccData.legacy)
-    const propsKeys = Array.from(
-      new Set([...globalKeys, ...legacyKeys, ...ownKeys])
-    )
-
-    return propsKeys
-  }
-
-  const getPropClassNameValue = (
-    propValue: boolean | string,
-    propType: PropType | undefined
-  ): string | null => {
-    if (!propValue || !propType) return null
-
-    if (propType.type === 'boolean') {
-      const classKey = propType.key
-      return style[classKey]
-    } else if (typeof propValue === 'string' && propType.type === 'ternary') {
-      const classKey = propType.values[propValue]?.key
-      return style[classKey] || null
-    }
-    return null
-  }
-
-  const getComponentActiveClassNames = (
-    props: any,
-    componentName: string,
-    propsKeys: string[],
-    previousClassNamesRef: React.MutableRefObject<{
-      [PropKey: string]: { propValue: string; className: string }
-    }>
-  ) => {
-    const classNames: string[] = []
-    const ownClass = style[componentName]
-
-    !!ownClass && classNames.push(ownClass)
-    !!defaultClassName && classNames.push(defaultClassName)
-    !!props.className && classNames.push(props.className)
-
-    const cData = componentsData[componentName]
-
-    if (!cData) return ''
-
-    const parentsClassName = cData.extensions
-      .map((parent) => style[parent])
-      .join(' ')
-
-    if (parentsClassName) {
-      classNames.push(parentsClassName)
-    }
-
-    propsKeys.forEach((propKey) => {
-      const propValue = props[propKey]
-      if (!propValue) return
-
-      const previous = previousClassNamesRef.current[propKey]
-      if (previous && previous.propValue === propValue) {
-        !!previous.className && classNames.push(previous.className)
-        return
-      }
-      const jjClassNames: string[] = []
-      const globalClassName = getPropClassNameValue(
-        propValue,
-        globalProps[propKey]
-      )
-      if (globalClassName) {
-        jjClassNames.push(globalClassName)
-      }
-      const ownClassName = getPropClassNameValue(
-        propValue,
-        cData.props[propKey]
-      )
-      if (ownClassName) {
-        jjClassNames.push(ownClassName)
-      }
-      const parentLegacyClassName = (cData.legacy[propKey]?.parentNames || [])
-        .map((parent) => {
-          const parentLegacy = componentsData[parent]?.props?.[propKey]
-          return getPropClassNameValue(propValue, parentLegacy)
-        })
-        .join(' ')
-
-      if (parentLegacyClassName) {
-        jjClassNames.push(parentLegacyClassName)
-      }
-      const jjCN = jjClassNames.join(' ')
-
-      previousClassNamesRef.current[propKey] = { propValue, className: jjCN }
-
-      classNames.push(jjCN)
-    })
-
-    return classNames.join(' ').trim()
+  const getDataKts = (componentName: string, $as: any, tag: any) => {
+    const suffix =
+      typeof $as === 'string' || 'displayName' in $as ? '' : `.${tag}`
+    const dataKts = IS_DEV
+      ? { 'data-kts-name': `${devDebugPrefix}${componentName}${suffix}` }
+      : {}
+    return dataKts
   }
 
   const createComponentElement = <Props,>(componentName: string) => {
-    const propsKeys = getComponentPropsKeys(componentName)
-    const emptyCssProps = propsKeys.reduce((acc, key) => {
-      acc[key] = undefined
-      return acc
-    }, {})
+    const getComponentClassNames = (props: any) => {
+      return Object.entries(store.propsKeys).reduce(
+        (iiClassName, [$prop, dirtyClasses]) => {
+          const propValue = props[$prop]
+          if (!propValue) return iiClassName
 
-    const devDebugPrefix = options?.devDebugPrefix ?? 'S.'
+          const newClass = dirtyClasses.reduce((jjClassName, dirtyClass) => {
+            const cleanClass = style[dirtyClass.replace('[?]', propValue)]
+            return cleanClass ? jjClassName + ' ' + cleanClass : jjClassName
+          }, '')
 
-    /**
-     * @description CSSComponent
-     */
-    const CSSComponent = React.forwardRef(function (props: any, ref) {
-      const { $as = 'div', children, ...rest } = props
-      const classNamesRef = React.useRef({ ...emptyCssProps })
-      const className = getComponentActiveClassNames(
-        props,
-        componentName as string,
-        propsKeys,
-        classNamesRef
+          return newClass ? iiClassName + ' ' + newClass : iiClassName
+        },
+        props.className
       )
+    }
 
-      const tag = typeof $as === 'string' ? $as : 'tag' in $as ? $as.tag : $as
-      const suffix =
-        typeof $as === 'string' || 'displayName' in $as ? '' : `.${tag}`
+    const store = {
+      propsKeys: {} as { [$prop: string]: string[] },
+      emptyKeys: {},
+      rootClassName: ''
+    }
+
+    const updateStore = (mapping: {}) => {
+      const propsEntries = Object.entries(mapping)
+      propsEntries.forEach(([$prop, dirtyClass]) => {
+        store.emptyKeys[$prop] = undefined
+        store.propsKeys[$prop] = store.propsKeys[$prop] || []
+        store.propsKeys[$prop].push(dirtyClass as string)
+      })
+    }
+
+    const init = async () => {
+      const { extensions } = componentsData[componentName]
+      const rootClassName =
+        defaultClassName +
+        [style[componentName], ...extensions.map((ext) => style[ext])].join(' ')
+
+      store.rootClassName = rootClassName
+
+      updateStore(globalClassNamesMap)
+
+      const componentsArray = [componentName, ...extensions]
+      componentsArray.forEach((jjComponent) => {
+        const mapping = componentsData[jjComponent].propClassMapping
+        updateStore(mapping)
+      })
+    }
+    init()
+
+    const CSSComponent = React.forwardRef(function (props: any, ref) {
+      const { children, $as = 'div', ...rest } = props
+
+      const className = getComponentClassNames(props)
+
+      const tag = getTag($as)
+      const ktsRef = useRef<any>()
+      ktsRef.current = ktsRef.current ?? getDataKts(componentName, $as, tag)
+
       const Element = tag
-
-      const dataProps = IS_DEV
-        ? { 'data-kts-name': `${devDebugPrefix}${componentName}${suffix}` }
-        : {}
 
       return (
         <Element
-          {...dataProps}
+          {...ktsRef.current}
           {...rest}
-          {...emptyCssProps}
-          className={className}
+          {...store.emptyKeys}
+          className={`${store.rootClassName} ${className}`}
           ref={ref}
         >
           {children}
@@ -305,7 +171,11 @@ export const createRccHelper = <S extends Record<string, any>>(
     return addHTMLTags<Props>(CSSComponent as any)
   }
 
-  return createComponentElement
+  const rccs = Object.keys(componentsData).reduce((prev, componentName) => {
+    return { ...prev, [componentName]: createComponentElement(componentName) }
+  }, {} as any)
+
+  return rccs
 }
 
 export const toRCC = (
@@ -313,12 +183,11 @@ export const toRCC = (
   options: { devDebugPrefix?: string } = {}
 ) => {
   const createRCC = createRccHelper(style, options)
-
   const search = Object.keys(style).join('\n') // multilines
   const componentsKeys = findComponentKeys(search)
 
   return Object.keys(componentsKeys).reduce((prev: any, componentName: any) => {
-    prev[componentName] = createRCC<any>(componentName)
+    prev[componentName] = createRCC(componentName)
     return prev
   }, {}) as {
     [key: string]: RCC<any> & {
