@@ -23,7 +23,7 @@ function rccLoader(content, map, meta) {
 
   options._outputFilePath = utils.path.resolve(
     paths.join(pathSeparator),
-    `${options._outputFileName}.rcc.tsx`
+    `${options._outputFileName}.tsx`
   )
 
   options._devDebugPrefix = helpers.getDevDebugPrefix(this.resource, options)
@@ -52,6 +52,14 @@ function rccLoader(content, map, meta) {
     }
   })
 
+  try {
+    Object.keys(components).forEach((root) =>
+      helpers.getRecursiveErrorMessage({ options, root, components })
+    )
+  } catch (error) {
+    return utils.fs.writeFileSync(options._outputFilePath, `${error.message}`)
+  }
+
   const hasGlobalProps = helpers.getHasGlobalProps(components)
   components.GlobalClass.hasProps = hasGlobalProps
 
@@ -72,13 +80,7 @@ function rccLoader(content, map, meta) {
 
         const separator = prev ? ',\n  ' : ''
 
-        const hasProps =
-          helpers.getHasOwnProps(components, componentName) ||
-          helpers.getHasLegacyProps({
-            components,
-            root: componentName,
-            options
-          })
+        const hasProps = helpers.getHasOwnProps(components, componentName)
         // updating component Data with hasProps
         componentData.hasProps = hasProps
 
@@ -97,7 +99,7 @@ function rccLoader(content, map, meta) {
 
   const componentsPropsDefinition = exportStyleOnly
     ? ''
-    : helpers.getClassInterfacesDefinition(components)
+    : helpers.getBaseComponentsDefinition(components)
 
   const rccSeparator = !!componentsPropsDefinition || !!gcpTypeDef ? '\n' : ''
 

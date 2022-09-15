@@ -104,29 +104,23 @@ function createStyleType(className, prevContent = '') {
   return prevContent
 }
 
-function getClassInterfacesDefinition(components) {
-  return Object.entries(components).reduce((prevInterfaceDef, entry) => {
+function getBaseComponentsDefinition(components) {
+  return Object.entries(components).reduce((prevContentDefinition, entry) => {
     const [componentName, componentData] = entry
-    const { props, extensions, classNamesPropsMapping, hasProps } =
-      componentData
+    const { props, classNamesPropsMapping, hasProps } = componentData
 
-    if (!hasProps) return prevInterfaceDef
+    if (!hasProps) return prevContentDefinition
 
     const propsContent = getComponentPropertiesDef(
       props,
       classNamesPropsMapping
     )
 
-    let extensionString = Array.from(extensions)
-      .filter((ext) => !!components[ext]?.hasProps)
-      .map((extName) => `${extName}Props`)
-      .join(', ')
-    if (extensionString.trim()) {
-      extensionString = `extends ${extensionString} `
-    }
     const lastNewLine = propsContent ? '\n' : ''
-    const firstNewLine = prevInterfaceDef ? '\n\n' : ''
-    return `${prevInterfaceDef}${firstNewLine}export interface ${componentName}Props ${extensionString}{${propsContent}${lastNewLine}}`
+    const prevContent = prevContentDefinition
+      ? `${prevContentDefinition}\n\n`
+      : ''
+    return `${prevContent}const ${componentName} = (p: {${propsContent}}) => (<RCCElement {...p} rcc={${componentName}} />)${lastNewLine}`
   }, '')
 }
 
@@ -196,28 +190,36 @@ function getHasGlobalProps(components) {
   return !!Object.keys(components.GlobalClass?.props ?? {}).length
 }
 
-function getHasLegacyProps({ options, components, root, treeKeys = [root] }) {
+function getRecursiveErrorMessage({
+  options,
+  components,
+  root,
+  treeKeys = [root]
+}) {
   if (new Set(treeKeys).size !== treeKeys.length) {
     console.log(`\nrecursive extensions in ${options._resource}`)
-    console.error(`recursive extensions: ${treeKeys.join(' ==> ')}\n`)
-    return true
+    const errorMsg = createStringContent([
+      `\nconsole.error("recursive extensions in ${options._resource}")`,
+      `recursive extensions: ${treeKeys.join(' ==> ')}\n`
+    ])
+
+    throw new Error(errorMsg)
   }
   const componentData = getComponentByName(components, root)
   if (!componentData) {
-    return false
+    return
   }
   const { extensions } = componentData
   const parentsArr = Array.from(extensions)
-  const hasLegacyProps = parentsArr.some(
-    (parentName) =>
-      getHasLegacyProps({
-        components,
-        root: parentName,
-        treeKeys: [...treeKeys, parentName],
-        options
-      }) || getHasOwnProps(components, parentName)
+  const errorMessage = parentsArr.some((parentName) =>
+    getRecursiveErrorMessage({
+      components,
+      root: parentName,
+      treeKeys: [...treeKeys, parentName],
+      options
+    })
   )
-  return hasLegacyProps
+  return errorMessage
 }
 
 function getHasOwnProps(components, componentName) {
@@ -249,7 +251,7 @@ function getShouldCompileFromHash({ classNames, options, resource, rootDir }) {
   const esoHash = options.exportStyleOnly ? '#eso; ' : ''
   const cnHash = `#cn=${classNames.join('|')};`
   const prefixHash = `#pfx=${options._devDebugPrefix}; `
-  const outputFilenameHash = `#ofn=${options._outputFileName}; `
+  const outputFilenameHash = `#ofn=${options._outputFileName};`
   const newHash = `##hash## ${esoHash}${cnHash}${prefixHash}${outputFilenameHash}`
   if (fs.existsSync(options._outputFilePath)) {
     const fileContent = fs.readFileSync(options._outputFilePath, 'utf8')
@@ -266,7 +268,7 @@ module.exports = {
   cleanCssString,
   createStringContent,
   createStyleType,
-  getClassInterfacesDefinition,
+  getBaseComponentsDefinition,
   getClassNamesFromCssString,
   getComponentByName,
   getComponentPropertiesDef,
@@ -274,7 +276,7 @@ module.exports = {
   getEmptyComponentData,
   getExportStyleOnly,
   getHasGlobalProps,
-  getHasLegacyProps,
+  getRecursiveErrorMessage,
   getHasOwnProps,
   getNewFileName,
   getShouldCompileFromHash

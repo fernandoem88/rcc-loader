@@ -1,0 +1,109 @@
+// use only defined classes in the default class
+.--DEFAULT {
+  :not(.Btn):not(.Selected) {
+    letter-spacing: 18px;
+  }
+}
+
+// global props
+.--font-size-28 {
+  font-size: 28px;
+}
+// global props
+.--font-size-52 {
+  font-size: 52px;
+}
+
+.Root {
+  height: 100%;
+  width: 100%;
+
+  &--red_as_color {
+    color: red;
+  }
+
+  &--green_as_color {
+    color: green;
+  }
+
+  &--yellow_as_color {
+    color: yellow;
+    &--dark-yellow {
+      color: orange;
+      &--sub-dark-yellow {
+        color: orangered;
+      }
+    }
+  }
+
+  &--border-radius {
+    border-radius: 3px;
+    border: solid 1px var(--border-color);
+    padding: 12px;
+  }
+}
+
+.HeaderTitle {
+  text-align: center;
+  padding: 15px;
+  &--centered {
+    text-align: center;
+  }
+}
+
+.Content {
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  max-height: 100px;
+  overflow-y: auto;
+  padding: 8px;
+  color: var(--text-color);
+  &--collapsed_as_status {
+    min-height: 0px;
+    height: 0;
+    overflow: hidden;
+  }
+  &--expanded_as_status {
+    height: auto;
+  }
+  border: solid 1px var(--border-color);
+}
+
+.Item {
+  color: gray;
+  &:not(:first-child) {
+    margin-left: 15px;
+  }
+}
+
+.Selected {
+  color: blue;
+}
+
+.BtnWrapper {
+  margin-top: 30px;
+}
+
+.Btn {
+  padding: 20px;
+  &--dark-mode {
+    background: #888;
+    border: solid 1px #888;
+    color: white;
+    &--yolo {
+      color: black;
+    }
+  }
+}
+
+.ExpandBtn,
+.ExpandBtn_ext_Btn {
+  text-align: center;
+  margin-left: 4px;
+}
+
+.Likunza,
+.Likunza_ext_Btn {
+  color: red;
+}
