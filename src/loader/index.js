@@ -24,8 +24,6 @@ function rccLoader(content, map, meta) {
     return
   }
 
-  console.log('\n\n exportable', options._exportable)
-
   options._getFSModule = () => this.fs
   options._resource = this.resource.replace(this.rootContext, '.')
   options._outputFileName = helpers.getNewFileName(this.resource, options)

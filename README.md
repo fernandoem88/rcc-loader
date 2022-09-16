@@ -320,10 +320,10 @@ if for some reason, we want to have some default props for all components in the
 }
 ```
 
-# Component prefix
+# Component name prefix
 
 by default your component in react dev tools will appear like this: **<S.Root.div />**.
-you can set the rcc \_\_prefix\_\_ value to a more specific name, for example to have **Card.Root.div />**
+you can set the rcc \_\_prefix\_\_ value to a more specific name, for example to have **<Card.Root.div />**
 
 ```tsx
 // here S is fully typed

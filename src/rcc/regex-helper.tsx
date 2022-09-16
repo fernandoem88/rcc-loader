@@ -47,11 +47,15 @@ export const findComponentPropsMap = (
   // const reg = new RegExp(`(?<=${component}--)(.+--)*(.+)$`, "gm");
   const reg = new RegExp(`^(${component}--)(.+--)*(.+)$`, 'gm')
 
-  const propsMap: { [K: string]: string } = {}
+  const propsMap: { [$prop: string]: string } = {}
 
   globalSearch.replace(reg, (...args) => {
     const [, prefix, mainClass = '', prop] = args
-    propsMap[prop] = `${prefix}${mainClass}${prop}`
+    const [tValue, $tProp] = prop.split('_as_')
+    const isTernary = prop.indexOf('_as_') !== -1
+    const $prop = isTernary ? $tProp : prop
+    const placeholder = isTernary ? prop.replace(tValue, '[?]') : prop
+    propsMap[$prop] = `${prefix}${mainClass}${placeholder}`
     return ''
   })
 
