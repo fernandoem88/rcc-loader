@@ -110,7 +110,7 @@ const MyComponent = ({
 ## how to Install
 
 ```bash
-npm i -S rcc-loader
+npm i -D rcc-loader
 ```
 
 ## use and options
@@ -144,7 +144,6 @@ const nextConfig = {
              * in this case, my-style-eso.module.scss for example will export only the ModuleStyle type
              **/
             exports: { rcc: true, style: false },
-
             // getOutputFileName: (optional), to generate file with different name then the defualt one.
             getOutputFileName: (filename, fileDir) =>
               `awesomename-${filename.replace('.module.scss', '')}`,
@@ -369,7 +368,7 @@ const nextConfig = {
 }
 ```
 
-our previous style.scss file will generate the following content
+our previous _my-app.module.scss_ file will generate the following content
 
 ```tsx
 import _style from './my-app.module.scss'
