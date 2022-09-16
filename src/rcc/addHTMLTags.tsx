@@ -17,6 +17,7 @@ export const addHTMLTags = <Props,>(
   return new Proxy(Component as any, {
     get(target, prop: string, receiver) {
       const tag = prop // prop.substring(1);
+
       if (!target[prop] && isHTMLTag(tag)) {
         const as = { tag }
         const newFC = React.forwardRef((props: any, ref) => (
@@ -24,7 +25,7 @@ export const addHTMLTags = <Props,>(
         ))
         newFC.displayName = `${(Component as any).displayName}.${tag}`
         target[prop] = newFC
-        return newFC
+        // return Reflect.get(target, prop, receiver)
       }
 
       return Reflect.get(target, prop, receiver)

@@ -1,5 +1,5 @@
-import React, { useRef } from 'react'
-import { ComponentData, RCC, TaggedRCC } from './typings'
+import React from 'react'
+import { ComponentData, RCC as NoTagRCC, TaggedRCC } from './typings'
 import { addHTMLTags } from './rcc/addHTMLTags'
 import {
   checkRecursiveExtensions,
@@ -7,7 +7,7 @@ import {
   findComponentPropsMap
 } from './rcc/regex-helper'
 
-const IS_DEV = process.env.NODE_ENV === 'development'
+// const IS_DEV = process.env.NODE_ENV === 'development'
 
 const getTag = ($as: string | { tag: any }) => {
   const tag = typeof $as === 'string' ? $as : 'tag' in $as ? $as.tag : $as
@@ -36,10 +36,7 @@ const getCleanPropClassMapping = (propClassMap: [string, string]) => {
   }
 }
 
-export const createRccHelper = (
-  style: any,
-  options?: { devDebugPrefix?: string }
-) => {
+export const createRccHelper = (style: any) => {
   const search = Object.keys(style).join('\n') // multilines
 
   const componentsData = {} as { [ComponentName: string]: ComponentData }
@@ -81,8 +78,9 @@ export const createRccHelper = (
     checkRecursiveExtensions(componentName, componentsData)
   })
 
-  const devDebugPrefix = options?.devDebugPrefix ?? 'S.'
+  // const devDebugPrefix = options?.devDebugPrefix ?? 'S.'
 
+  /*
   const getDataKts = (componentName: string, $as: any, tag: any) => {
     const suffix =
       typeof $as === 'string' || 'displayName' in $as ? '' : `.${tag}`
@@ -91,6 +89,7 @@ export const createRccHelper = (
       : {}
     return dataKts
   }
+  */
 
   const createComponentElement = <Props,>(componentName: string) => {
     const getComponentClassNames = (props: any) => {
@@ -100,7 +99,7 @@ export const createRccHelper = (
           if (!propValue) return iiClassName
 
           const newClass = dirtyClasses.reduce((jjClassName, dirtyClass) => {
-            const cleanClass = style[dirtyClass.replace('[?]', propValue)]
+            const cleanClass = style[dirtyClass.replace('[?]', propValue) || '']
             return cleanClass ? jjClassName + ' ' + cleanClass : jjClassName
           }, '')
 
@@ -149,14 +148,13 @@ export const createRccHelper = (
       const className = getComponentClassNames(props)
 
       const tag = getTag($as)
-      const ktsRef = useRef<any>()
-      ktsRef.current = ktsRef.current ?? getDataKts(componentName, $as, tag)
+      // const ktsRef = useRef<any>()
+      // ktsRef.current = ktsRef.current ?? getDataKts(componentName, $as, tag)
 
       const Element = tag
 
       return (
         <Element
-          {...ktsRef.current}
           {...rest}
           {...store.emptyKeys}
           className={`${store.rootClassName} ${className}`}
@@ -167,7 +165,7 @@ export const createRccHelper = (
       )
     })
 
-    CSSComponent.displayName = `${devDebugPrefix}${componentName}`
+    CSSComponent.displayName = `S.${componentName}`
     return addHTMLTags<Props>(CSSComponent as any)
   }
 
@@ -175,14 +173,22 @@ export const createRccHelper = (
     return { ...prev, [componentName]: createComponentElement(componentName) }
   }, {} as any)
 
-  return rccs
+  return new Proxy(rccs, {
+    set(target, prop, prefix) {
+      if (prop === '__prefix__' && typeof prefix === 'string') {
+        Object.keys(target).forEach((Component: any) => {
+          const displayName = Component.displayName.substr(2)
+          Component.displayName = prefix + displayName
+        })
+        return true
+      }
+      return false
+    }
+  })
 }
 
-export const toRCC = (
-  style: any,
-  options: { devDebugPrefix?: string } = {}
-) => {
-  const createRCC = createRccHelper(style, options)
+export const toRCC = (style: any) => {
+  const createRCC = createRccHelper(style)
   const search = Object.keys(style).join('\n') // multilines
   const componentsKeys = findComponentKeys(search)
 
@@ -190,8 +196,10 @@ export const toRCC = (
     prev[componentName] = createRCC(componentName)
     return prev
   }, {}) as {
-    [key: string]: RCC<any> & {
-      [K in keyof JSX.IntrinsicElements]: TaggedRCC<Omit<any, '$as'>, K>
-    }
+    [key: string]: RCC<any>
   }
+}
+
+export type RCC<Props> = NoTagRCC<Props> & {
+  [K in keyof JSX.IntrinsicElements]: TaggedRCC<Omit<Props, '$as'>, K>
 }

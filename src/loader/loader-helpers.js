@@ -94,8 +94,8 @@ function createStyleType(className, prevContent = '') {
   const [root] = className.split('--')
   if (
     className !== '--DEFAULT' &&
-    !className.includes('_ext_') &&
-    !root.includes('-')
+    !className.includes('_ext_')
+    // && !root.includes('-')
   ) {
     const styleKey = className.includes('-') ? `"${className}"` : className
     const separator = prevContent ? '\n  ' : ''
@@ -103,7 +103,7 @@ function createStyleType(className, prevContent = '') {
   }
   return prevContent
 }
-
+/*
 function getBaseComponentsDefinition(components) {
   return Object.entries(components).reduce((prevContentDefinition, entry) => {
     const [componentName, componentData] = entry
@@ -121,6 +121,32 @@ function getBaseComponentsDefinition(components) {
       ? `${prevContentDefinition}\n\n`
       : ''
     return `${prevContent}const ${componentName} = (p: {${propsContent}}) => (<RCCElement {...p} rcc="${componentName}" />)${lastNewLine}`
+  }, '')
+}
+*/
+function getClassInterfacesDefinition(components) {
+  return Object.entries(components).reduce((prevInterfaceDef, entry) => {
+    const [componentName, componentData] = entry
+    const { props, extensions, classNamesPropsMapping, hasProps } =
+      componentData
+
+    if (!hasProps) return prevInterfaceDef
+
+    const propsContent = getComponentPropertiesDef(
+      props,
+      classNamesPropsMapping
+    )
+
+    let extensionString = Array.from(extensions)
+      .filter((ext) => !!components[ext]?.hasProps)
+      .map((extName) => `${extName}Props`)
+      .join(', ')
+    if (extensionString.trim()) {
+      extensionString = `extends ${extensionString} `
+    }
+    const lastNewLine = propsContent ? '\n' : ''
+    const firstNewLine = prevInterfaceDef ? '\n\n' : ''
+    return `${prevInterfaceDef}${firstNewLine}export interface ${componentName}Props ${extensionString}{${propsContent}${lastNewLine}}`
   }, '')
 }
 
@@ -176,18 +202,43 @@ function getDevDebugPrefix(resource, options) {
   return devDebugPrefix
 }
 
-function getExportStyleOnly(resource, options) {
-  const { exportStyleOnly = false } = options
-  if (typeof exportStyleOnly === 'function') {
+function getExportTypes(resource, options) {
+  const { exports = {} } = options
+  if (typeof exports === 'function') {
     const paths = resource.split(pathSeparator)
     const fileName = paths.pop()
-    return exportStyleOnly(fileName, paths.join(pathSeparator))
+    const { rcc = true, style = false } = exports(
+      fileName,
+      paths.join(pathSeparator)
+    )
+    return { rcc, style }
   }
-  return exportStyleOnly
+  const { rcc = true, style = false } = exports
+  return { rcc, style }
 }
 
 function getHasGlobalProps(components) {
   return !!Object.keys(components.GlobalClasses?.props ?? {}).length
+}
+
+function getHasProps({ root, options, components, treeKeys = [root] }) {
+  const componentData = getComponentByName(components, root)
+  if (!componentData) {
+    return false
+  }
+  const { extensions } = componentData
+  const parentsArr = Array.from(extensions)
+  const hasProps =
+    getHasOwnProps(components, root) ||
+    parentsArr.some((parentName) =>
+      getHasProps({
+        components,
+        root: parentName,
+        treeKeys: [...treeKeys, parentName],
+        options
+      })
+    )
+  return hasProps
 }
 
 function getRecursiveErrorMessage({
@@ -258,11 +309,11 @@ function getNewFileName(resource, options) {
 }
 
 function getShouldCompileFromHash({ classNames, options, resource, rootDir }) {
-  const esoHash = options.exportStyleOnly ? '#eso; ' : ''
+  const esoHash = options._exportable.style ? '#stl_expo; ' : ''
+  const rccHash = options._exportable.rcc ? '#rcc_expo; ' : ''
   const cnHash = `#cn=${classNames.join('|')};`
-  const prefixHash = `#pfx=${options._devDebugPrefix}; `
   const outputFilenameHash = `#ofn=${options._outputFileName};`
-  const newHash = `##hash## ${esoHash}${cnHash}${prefixHash}${outputFilenameHash}`
+  const newHash = `##hash## ${rccHash}${esoHash}${cnHash}${outputFilenameHash}`
   if (fs.existsSync(options._outputFilePath)) {
     const fileContent = fs.readFileSync(options._outputFilePath, 'utf8')
     const oldHash = fileContent
@@ -278,15 +329,16 @@ module.exports = {
   cleanCssString,
   createStringContent,
   createStyleType,
-  getBaseComponentsDefinition,
+  getClassInterfacesDefinition,
   getClassNamesFromCssString,
   getComponentByName,
   getComponentPropertiesDef,
   getDevDebugPrefix,
   getEmptyComponentData,
-  getExportStyleOnly,
+  getExportTypes,
   getHasGlobalProps,
   getRecursiveErrorMessage,
+  getHasProps,
   getHasOwnProps,
   getNewFileName,
   getShouldCompileFromHash

@@ -67,7 +67,7 @@ export interface ModuleStyle {
   'DeleteBtn--disabled': string
 }
 
-// set exportStyleOnly to true in the webpack config to export only the style
+// set config.exports to { style: true, rcc: false } in the webpack config to export only the style definition
 export const style: ModuleStyle = _style as any
 
 export interface RootProps {
@@ -149,28 +149,24 @@ const nextConfig = {
             /**
              * enabled: (required) the loader should be enabled only in Dev environment.
              * alternatively you can just, add the rccLoaderRule to webpack only in dev and set enabled to true by default
-            */
+             */
             enabled: !!dev && isServer,
             /**
-             * exportStyleOnly: (optional: boolean | Function), false by default. set it to true in case you want only to export the ModuleStyle from the generated file.
+             * exports: (optional: { rcc: boolean, style: boolean} | Function).
+             * exports.rcc: true by default. set it to false in case you dont want to export rcc components.
+             * exports.style: false by default. set it to true in case you want to export ModuleStyle definitions.
              *  you can use a function in case you want to set it only for given modules or name templates
-             * eg: (filename, fileDir) => /-eso\.module\.scss$/.test(filename)
+             * eg: (filename, fileDir) => /-eso\.module\.scss$/.test(filename) ? ({ style: true, rcc: false }) : undefined
              * in this case, my-style-eso.module.scss for example will export only the ModuleStyle type
-            **/
-            exportStyleOnly: false,
-            
+             **/
+            exports: { rcc: true, style: false },
+
             // getOutputFileName: (optional), to generate file with different name then the defualt one.
             getOutputFileName: (filename, fileDir) =>
               `awesomename-${filename.replace('.module.scss', '')}`,
             // sassOptions: (optional) - sassOptions to pass to sass compiler
             // => sass.compileString(cssString, sassOptions). for example to resolve absolute imports, etc.
             sassOptions: {}
-            // devDebugPrefix: (optional: string | function) - for dev environment, dom elements will have a data-kts-name attribute that will help for a fast look up in the project files. the default devDebugPrefix is S.
-            //let's assume we render <S.ContentWrapper.div /> in our project, the dom will have data-kts-name="S.ContentWrapper.div"
-            // we can have a dynamic prefix corresponding to our css module file.
-            // eg: (fileName, fileDir) => fileName.replace(".module.scss", ".")
-            // in this case, if our module file name is Overlay.module.scss, we wil then have data-kts-name="Overlay.ContentWrapper.div". etc.
-            devDebugPrefix: "S."
           }
         }
       ]
@@ -341,6 +337,22 @@ if for some reason, we want to have some default props for all components in the
 }
 ```
 
+# Component prefix
+
+by default your component in react dev tools will appear like this: **<S.Root.div />**.
+you can set the rcc \_\_prefix\_\_ value to a more specific name, for example to have **Card.Root.div />**
+
+```tsx
+// here S is fully typed
+import Card from './my-style.rcc'
+
+(Card as any).__prefix__ = "Card."
+
+export const MyComponent = () => {
+  return <Card.Root.div>Hello World</S.Root.div>
+}
+
 # License
 
 MIT © [https://github.com/fernandoem88/rcc-loader](https://github.com/fernandoem88/rcc-loader)
+```

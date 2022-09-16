@@ -16,6 +16,16 @@ function rccLoader(content, map, meta) {
   const paths = this.resource.split(pathSeparator)
   const resourceFileName = paths.pop()
 
+  options._exportable = helpers.getExportTypes(this.resource, options)
+
+  const { rcc: exportableRCC, style: exportableStyle } = options._exportable
+
+  if (!exportableRCC && !exportableStyle) {
+    return
+  }
+
+  console.log('\n\n exportable', options._exportable)
+
   options._getFSModule = () => this.fs
   options._resource = this.resource.replace(this.rootContext, '.')
   options._outputFileName = helpers.getNewFileName(this.resource, options)
@@ -25,10 +35,6 @@ function rccLoader(content, map, meta) {
     paths.join(pathSeparator),
     `${options._outputFileName}.tsx`
   )
-
-  options._devDebugPrefix = helpers.getDevDebugPrefix(this.resource, options)
-
-  const exportStyleOnly = helpers.getExportStyleOnly(this.resource, options)
 
   const cssString = sass.compileString(content, options.sassOptions || {}).css
   const classNamesArray = helpers.getClassNamesFromCssString(cssString)
@@ -47,7 +53,7 @@ function rccLoader(content, map, meta) {
   let styleModuleType = ''
   classNamesArray.forEach((className) => {
     styleModuleType = helpers.createStyleType(className, styleModuleType)
-    if (!exportStyleOnly) {
+    if (exportableRCC) {
       helpers.addParsedClassNameData(className, components)
     }
   })
@@ -66,14 +72,16 @@ function rccLoader(content, map, meta) {
   const hasGlobalProps = helpers.getHasGlobalProps(components)
   components.GlobalClasses.hasProps = hasGlobalProps
 
-  const styleContent = helpers.createStringContent([
-    '\n\nexport interface ModuleStyle {',
-    `  ${styleModuleType}`,
-    '};',
-    '\nexport const style: ModuleStyle = _style as any;\n'
-  ])
+  const styleContent = exportableStyle
+    ? helpers.createStringContent([
+        '\n\nexport interface ModuleStyle {',
+        `  ${styleModuleType}`,
+        '};',
+        '\nexport const style: ModuleStyle = _style as any;'
+      ])
+    : ''
 
-  const rccComponentsImplementation = exportStyleOnly
+  const rccComponentsImplementation = !exportableRCC
     ? ''
     : Object.entries(components).reduce((prev, entry) => {
         const [componentName, componentData] = entry
@@ -81,47 +89,50 @@ function rccLoader(content, map, meta) {
           return prev
         }
 
-        const separator = prev ? ',\n  ' : ''
+        const separator = prev ? ';\n  ' : ''
 
-        const hasProps = helpers.getHasOwnProps(components, componentName)
+        const hasProps = helpers.getHasProps({
+          components,
+          root: componentName,
+          options
+        })
         // updating component Data with hasProps
         componentData.hasProps = hasProps
 
         const ownTypeDefinition = hasProps ? `${componentName}Props` : '{}'
-        const gcpPropDefinition = hasGlobalProps
-          ? `GCP<${ownTypeDefinition}>`
-          : ownTypeDefinition
-        const jjContent = `${separator}${componentName}: createRCC<${gcpPropDefinition}>("${componentName}")`
+        const gcpPropDefinition =
+          hasProps && hasGlobalProps
+            ? `GCP & ${ownTypeDefinition}`
+            : hasGlobalProps
+            ? 'GCP'
+            : ownTypeDefinition
+        const jjContent = `${separator}${componentName}: RCC<${gcpPropDefinition}>`
 
         return `${prev}${jjContent}`
       }, '')
 
-  const gcpTypeDef = hasGlobalProps
-    ? '\n\ntype GCP<T> = T & GlobalClassesProps;'
-    : ''
+  const gcpTypeDef =
+    hasGlobalProps && exportableRCC ? '\n\ntype GCP = GlobalClassesProps;' : ''
 
-  const componentsPropsDefinition = exportStyleOnly
-    ? ''
-    : helpers.getBaseComponentsDefinition(components)
+  const componentsPropsDefinition = exportableRCC
+    ? '\n' + helpers.getClassInterfacesDefinition(components)
+    : ''
 
   const rccSeparator = !!componentsPropsDefinition || !!gcpTypeDef ? '\n' : ''
 
-  const rccContent = exportStyleOnly
-    ? ''
-    : helpers.createStringContent([
+  const rccContent = exportableRCC
+    ? helpers.createStringContent([
         `${rccSeparator}${componentsPropsDefinition}${gcpTypeDef}`,
-        'const createRCC = createRccHelper(style, {',
-        `  devDebugPrefix: "${options._devDebugPrefix}"`,
-        '});',
-        '\nconst cssComponents = {',
+        '\nconst cssComponents = createRccHelper(_style) as {',
         `  ${rccComponentsImplementation}`,
         '};',
         '\nexport default cssComponents;'
       ])
+    : ''
 
-  const rccImport = exportStyleOnly
-    ? ''
-    : `import { createRccHelper } from 'rcc-loader/dist/rcc-core';\n`
+  const rccImport = exportableRCC
+    ? `import { createRccHelper, RCC } from 'rcc-loader/dist/rcc-core';\n`
+    : ''
 
   const styleImport = `import _style from "./${resourceFileName}";`
 
