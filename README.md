@@ -8,6 +8,8 @@
 > - **easy to debug in React dev tools**
 > - **type definition for css module classNames**
 
+in case you are only looking for css module types definition, jump down to the bottom of this page.
+
 ## Example
 
 let's suppose to have the following scss file _my-app.module.scss_
@@ -53,7 +55,7 @@ let's suppose to have the following scss file _my-app.module.scss_
 the loader will generate the following file _my-app.rcc.tsx_.
 
 ```tsx
-import { createRCCs, RCC } from 'rcc-loader/dist/rcc-core'
+import { toRCC, RCC } from 'rcc-loader/dist/rcc-core'
 import _style from './my-app.module.scss'
 
 export interface RootProps {
@@ -68,7 +70,7 @@ export interface DeleteBtnProps extends BtnProps {
   $disabled?: boolean
 }
 
-const cssComponents = createRCCs(_style) as {
+const cssComponents = toRCC(_style) as {
   Root: RCC<RootProps>
   Btn: RCC<BtnProps>
   DeleteBtn: RCC<DeleteBtnProps>
@@ -168,7 +170,7 @@ after setting up the config, we will first use the **toRCC** transformer in our 
 import { toRCC } from 'rcc-loader/dist/rcc-core'
 import style from './my-style.module.scss'
 
-// S type is an index { [key: string]: RCC }
+// S type is an index { [key: string]: RCC<any> }
 const S = toRCC(style)
 
 export const MyComponent = () => {
