@@ -36,7 +36,7 @@ const getCleanPropClassMapping = (propClassMap: [string, string]) => {
   }
 }
 
-export const createRccHelper = (style: any) => {
+export const createRCCs = (style: any) => {
   const search = Object.keys(style).join('\n') // multilines
 
   const componentsData = {} as { [ComponentName: string]: ComponentData }
@@ -188,7 +188,7 @@ export const createRccHelper = (style: any) => {
 }
 
 export const toRCC = (style: any) => {
-  const createRCC = createRccHelper(style)
+  const createRCC = createRCCs(style)
   const search = Object.keys(style).join('\n') // multilines
   const componentsKeys = findComponentKeys(search)
 

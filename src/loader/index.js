@@ -123,7 +123,7 @@ function rccLoader(content, map, meta) {
   const rccContent = exportableRCC
     ? helpers.createStringContent([
         `${rccSeparator}${componentsPropsDefinition}${gcpTypeDef}`,
-        '\nconst cssComponents = createRccHelper(_style) as {',
+        '\nconst cssComponents = createRCCs(_style) as {',
         `  ${rccComponentsImplementation}`,
         '};',
         '\nexport default cssComponents;'
@@ -131,7 +131,7 @@ function rccLoader(content, map, meta) {
     : ''
 
   const rccImport = exportableRCC
-    ? `import { createRccHelper, RCC } from 'rcc-loader/dist/rcc-core';\n`
+    ? `import { createRCCs, RCC } from 'rcc-loader/dist/rcc-core';\n`
     : ''
 
   const styleImport = `import _style from "./${resourceFileName}";`

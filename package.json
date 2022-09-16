@@ -37,7 +37,6 @@
   },
   "peerDependencies": {
     "path": ">= 0.12.7",
-    "react": ">= 16.0.0",
     "sass": ">= 1.54.3"
   },
   "devDependencies": {

@@ -6,7 +6,7 @@
 >
 > - **fast classNames mapping**
 > - **easy to debug in React dev tools**
-> - **typed css module classNames**
+> - **type definition for css module classNames**
 
 ## Example
 
@@ -53,22 +53,8 @@ let's suppose to have the following scss file _my-app.module.scss_
 the loader will generate the following file _my-app.rcc.tsx_.
 
 ```tsx
-import { createRccHelper } from 'rcc-loader/dist/rcc-core'
+import { createRCCs, RCC } from 'rcc-loader/dist/rcc-core'
 import _style from './my-app.module.scss'
-
-export interface ModuleStyle {
-  Root: string
-  'Root--dark-mode': string
-  Btn: string
-  'Btn--sm_as_size': string
-  'Btn--md_as_size': string
-  'Btn--lg_as_size': string
-  DeleteBtn: string
-  'DeleteBtn--disabled': string
-}
-
-// set config.exports to { style: true, rcc: false } in the webpack config to export only the style definition
-export const style: ModuleStyle = _style as any
 
 export interface RootProps {
   '$dark-mode'?: boolean
@@ -82,14 +68,10 @@ export interface DeleteBtnProps extends BtnProps {
   $disabled?: boolean
 }
 
-const createRCC = createRccHelper(style, {
-  devDebugPrefix: 'S.'
-})
-
-const cssComponents = {
-  Root: createRCC<RootProps>('Root'),
-  Btn: createRCC<BtnProps>('Btn'),
-  DeleteBtn: createRCC<DeleteBtnProps>('DeleteBtn')
+const cssComponents = createRCCs(_style) as {
+  Root: RCC<RootProps>
+  Btn: RCC<BtnProps>
+  DeleteBtn: RCC<DeleteBtnProps>
 }
 
 export default cssComponents
@@ -351,8 +333,59 @@ import Card from './my-style.rcc'
 export const MyComponent = () => {
   return <Card.Root.div>Hello World</S.Root.div>
 }
+```
+
+# Exporting only style module
+
+with the following configuration,
+
+```ts
+const nextConfig = {
+  // ...
+  webpack: (
+    config,
+    { buildId, dev, isServer, defaultLoaders, nextRuntime, webpack }
+  ) => {
+    const rccLoaderRule = {
+      test: /\.module\.scss$/,
+      use: [
+        {
+          loader: 'rcc-loader',
+          options: {
+            enabled: !!dev && isServer,
+            exports: (fileName, fileDir) => ({ rcc: false, style: true })
+          }
+        }
+      ]
+    }
+
+    config.module.rules = config.module.rules ?? []
+    config.module.rules.push(rccLoaderRule)
+
+    return config
+  }
+}
+```
+
+our previous style.scss file will generate the following content
+
+```tsx
+import _style from './my-app.module.scss'
+
+export interface ModuleStyle {
+  Root: string
+  'Root--dark-mode': string
+  Btn: string
+  'Btn--sm_as_size': string
+  'Btn--md_as_size': string
+  'Btn--lg_as_size': string
+  DeleteBtn: string
+  'DeleteBtn--disabled': string
+}
+
+export const style: ModuleStyle = _style as any
+```
 
 # License
 
 MIT © [https://github.com/fernandoem88/rcc-loader](https://github.com/fernandoem88/rcc-loader)
-```
