@@ -38,21 +38,19 @@ export const toRCC = (style: any) => {
     (componentName: string) =>
     (Element: any = 'div', prefix: string = 'S.') => {
       const getComponentClassNames = (props: any) => {
-        return Object.entries(store.propsKeys).reduce(
-          (iiClassName, [$prop, dirtyClasses]) => {
-            const propValue = props[$prop]
-            if (!propValue) return iiClassName
+        return Object.keys(props.$cn || {}).reduce((iiClassName, $prop) => {
+          const propValue = props[$prop]
 
-            const newClass = dirtyClasses.reduce((jjClassName, dirtyClass) => {
-              const cleanClass =
-                style[dirtyClass.replace('[?]', propValue) || '']
-              return cleanClass ? jjClassName + ' ' + cleanClass : jjClassName
-            }, '')
+          if (!propValue) return iiClassName
 
-            return newClass ? iiClassName + ' ' + newClass : iiClassName
-          },
-          props.className || ''
-        )
+          const dirtyClasses = store.propsKeys[$prop]
+          const newClass = dirtyClasses.reduce((jjClassName, dirtyClass) => {
+            const cleanClass = style[dirtyClass.replace('[?]', propValue) || '']
+            return cleanClass ? jjClassName + ' ' + cleanClass : jjClassName
+          }, '')
+
+          return newClass ? iiClassName + ' ' + newClass : iiClassName
+        }, props.className || '')
       }
 
       const store = {
@@ -94,7 +92,7 @@ export const toRCC = (style: any) => {
       const keysArray = Object.keys(store.propsKeys)
 
       const CSSComponent = React.forwardRef(function (props: any, ref) {
-        const { children, ...rest } = props
+        const { children, $cn, ...rest } = props
 
         const classDeps = keysArray.map((k) => props[k])
 
@@ -106,7 +104,6 @@ export const toRCC = (style: any) => {
         return (
           <Element
             {...rest}
-            {...store.emptyKeys}
             className={`${store.rootClassName} ${className}`}
             ref={ref}
           >
