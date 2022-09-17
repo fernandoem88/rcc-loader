@@ -8,7 +8,7 @@
 > - **easy to debug in React dev tools**
 > - **type definition for css module classNames**
 
-in case you are only looking for css module types definition, jump down to (the bottom of this page)[#-exporting-only-the-style-module].
+in case you are only looking for css module types definition, jump down to [the bottom of this page](#-exporting-only-the-style-module).
 
 ## Example
 
