@@ -8,7 +8,7 @@
 > - **easy to debug in React dev tools**
 > - **type definition for css module classNames**
 
-in case you are only looking for css module types definition, jump down to the bottom of this page.
+in case you are only looking for css module types definition, jump down to (the bottom of this page)[#-exporting-only-the-style-module].
 
 ## Example
 
@@ -97,7 +97,7 @@ const MyComponent = ({
   disabled?: boolean
 }) => {
   return (
-    // $as accepts html tags or react component
+    // pass your classNames values to the "$cn" prop
     <S.Root.div $cn={{ darkMode }}>
       <S.Btn.button $cn={{ size }}>I am a varible size button</S.Btn.button>
       <S.DeleteBtn.button $cn={{ size: 'lg', disabled }}>
@@ -170,7 +170,7 @@ after setting up the config, we will first use the **toRCC** transformer in our 
 import { toRCC } from 'rcc-loader/dist/rcc-core'
 import style from './my-style.module.scss'
 
-// S type is an index { [key: string]: RCC<any> }
+// S type is an index { [key: string]: Record<HtmlTag, RCC<any>> }
 const S = toRCC(style)
 
 export const MyComponent = () => {
@@ -189,50 +189,51 @@ export const MyComponent = () => {
 }
 ```
 
-# special class keys
+# ClassNames definition
 
 ## Component Class.
 
 the rcc component comes from the root class definition. Each _component class_ will be transformed to a **PascalCase**.
 
 ```scss
-// Root component
 .root {
+  // => Root component
 }
 
-// ItemWrapper component
 .item-wrapper {
+  // =>ItemWrapper component
 }
-// Note!!!
-// the following classes will create unexpected behaviour because they will have the same component name
 
-// ContentWrapper
+// Note!!!
+// the following classes will create unexpected behaviour because they will have the same component names
+
 .content-wrapper {
+  // => ContentWrapper
 }
-// ContentWrapper
 .-content-wrapper {
+  // => ContentWrapper
 }
-// to avoid being confused, you can directly define your component class as a Pascal case
+// to avoid confusion, we can directly define our component classes in PascalCase
 .Root {
 }
-.ItemWrapper {
+.ContentWrapper {
 }
 ```
 
-## component property class
+## component property class (element a modifier)
 
 it should start with the component root name followed by double dashes. Each _component property_ should be written in **kebab-case** (eg: .Component--prop-one--prop-two)
 
 ```scss
 .Wrapper {
   &--dark-mode {
-    &--border-2x {
-    }
+  }
+  &--size {
   }
 }
-// the Wrapper component will then have 2 props
-// $dark-mode: that comes from .Wrapper--dark-mode
-// $border-2x: that comes from .Wrapper--dark-mode--border-2x
+// the Wrapper component will then have $cn with 2 props
+// darkMode: that comes from .Wrapper--dark-mode
+// size: that comes from .Wrapper--size
 ```
 
 ## global property class
@@ -345,7 +346,7 @@ export const MyComponent = () => {
 }
 ```
 
-# Exporting only style module
+# Exporting only the style module
 
 with the following configuration,
 
@@ -385,7 +386,7 @@ import _style from './my-app.module.scss'
 export interface ModuleStyle {
   root: string
   'root--dark-mode': string
-  Btn: string
+  btn: string
   'btn--sm_as_size': string
   'btn--md_as_size': string
   'btn--lg_as_size': string
