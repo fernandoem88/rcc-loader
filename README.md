@@ -15,7 +15,7 @@ in case you are only looking for css module types definition, jump down to the b
 let's suppose to have the following scss file _my-app.module.scss_
 
 ```scss
-.Root {
+.root {
   background: white;
   color: black;
   &--dark-mode {
@@ -24,7 +24,7 @@ let's suppose to have the following scss file _my-app.module.scss_
   }
 }
 
-.Btn {
+.btn {
   border: solid 1px black;
   border-radius: 3px;
   cursor: pointer;
@@ -41,8 +41,8 @@ let's suppose to have the following scss file _my-app.module.scss_
 }
 
 /* _ext_:  is a special key to tell that a component should extend another component behaviour. in the following case for example, .DeleteBtn will herit from .Btn */
-.DeleteBtn,
-.DeleteBtn_ext_Btn {
+.delete-btn,
+.delete-btn_ext_btn {
   background: red;
   color: white;
   &--disabled {
@@ -59,15 +59,15 @@ import { toRCC, RCC } from 'rcc-loader/dist/rcc-core'
 import _style from './my-app.module.scss'
 
 export interface RootProps {
-  '$dark-mode'?: boolean
+  dark-Mode?: boolean
 }
 
 export interface BtnProps {
-  $size?: 'sm' | 'md' | 'lg'
+  size?: 'sm' | 'md' | 'lg'
 }
 // DeleteBtnProps extends BtnProps because we defined the class .DeleteBtn_ext_Btn
 export interface DeleteBtnProps extends BtnProps {
-  $disabled?: boolean
+  disabled?: boolean
 }
 
 const cssComponents = toRCC(_style) as {
@@ -88,21 +88,22 @@ now we can use it in our main component _MyComponent.tsx_
 import S from './my-app.rcc'
 
 const MyComponent = ({
-  isDarkMode,
-  isDeleteDisabled
+  darkMode,
+  disabld,
+  disabled
 }: {
-  isDarkMode: boolean
+  darkMode: boolean
+  size?: 'sm' | 'md' | 'lg'
+  disabled?: boolean
 }) => {
   return (
     // $as accepts html tags or react component
-    <S.Root $as='div' $dark-mode={isDarkMode}>
-      {/* if the browser supports proxy, we can directly define the html tag inline */}
-      <S.Btn.button $size='sm'>I am a small button</S.Btn.button>
-      <S.Btn.button $size='md'>I am a medium button</S.Btn.button>
-      <S.DeleteBtn.button $size='lg' $disabled={isDeleteDisabled}>
+    <S.Root.div $cn={{ darkMode }}>
+      <S.Btn.button $cn={{ size }}>I am a varible size button</S.Btn.button>
+      <S.DeleteBtn.button $cn={{ size: 'lg', disabled }}>
         I am a large Delete button
       </S.DeleteBtn.button>
-    </S.Root>
+    </S.Root.div>
   )
 }
 ```
