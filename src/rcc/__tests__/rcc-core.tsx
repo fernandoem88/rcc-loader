@@ -1,21 +1,22 @@
 import React from 'react'
 import { render, screen } from '@testing-library/react'
-import { toRCC } from '../create-rcc'
+import { toRCC } from '../core-helper'
 import { RCC } from '../../typings'
+
 const styleArr = [
   '--DEFAULT',
-  'Wrapper',
-  'Wrapper--dark-mode',
-  'BaseBtn',
-  'BaseBtn--size',
-  'Btn_ext_BaseBtn',
-  'Btn',
-  'Btn--sm_as_size',
-  'Btn--lg_as_size',
+  'wrapper',
+  'wrapper--dark-mode',
+  'base-btn',
+  'base-btn--size',
+  'btn_ext_base-btn',
+  'btn',
+  'btn--sm_as_size',
+  'btn--lg_as_size',
 
-  'DeleteBtn',
-  'DeleteBtn_ext_Btn',
-  'DeleteBtn--border-radius-2px',
+  'delete-btn',
+  'delete-btn_ext_btn',
+  'deleteBtn--border-radius-2px',
   '--fs-12px_as_font-size',
   '--fs-15px_as_font-size'
 ]
@@ -37,7 +38,7 @@ describe('components classnames and props mapping', () => {
   it('should render Wrapper component with the correct classname', async () => {
     render(<S.Wrapper.div>I am a wrapper</S.Wrapper.div>)
     const el = await screen.findByText('I am a wrapper')
-    expect(el.className).toContain('Wrapper')
+    expect(el.className).toContain('wrapper')
     expect(el.tagName).toBe('DIV')
   })
 
@@ -45,7 +46,7 @@ describe('components classnames and props mapping', () => {
     render(<S.Wrapper.span>I am a span</S.Wrapper.span>)
 
     const el = await screen.findByText('I am a span')
-    expect(el.className).toContain('Wrapper')
+    expect(el.className).toContain('wrapper')
     expect(el.tagName).toBe('SPAN')
   })
 
@@ -57,12 +58,12 @@ describe('components classnames and props mapping', () => {
       </>
     )
     const darkModeEl = await screen.findByText('dark mode')
-    expect(darkModeEl.className).toContain('Wrapper')
-    expect(darkModeEl.className).toContain('Wrapper--dark-mode')
+    expect(darkModeEl.className).toContain('wrapper')
+    expect(darkModeEl.className).toContain('wrapper--dark-mode')
 
     const noDarkModeEl = await screen.findByText('no dark mode')
-    expect(noDarkModeEl.className).toContain('Wrapper')
-    expect(noDarkModeEl.className.includes('Wrapper--dark-mode')).toBeFalsy()
+    expect(noDarkModeEl.className).toContain('wrapper')
+    expect(noDarkModeEl.className.includes('wrapper--dark-mode')).toBeFalsy()
   })
 
   it('should handle global props properly', async () => {
@@ -89,14 +90,14 @@ describe('components classnames and props mapping', () => {
       </>
     )
     const smBtn = await screen.findByText('small button')
-    expect(smBtn.className).toContain('Btn')
-    expect(smBtn.className).toContain('Btn--sm_as_size')
-    expect(smBtn.className.includes('Btn--lg_as_size')).toBeFalsy()
+    expect(smBtn.className).toContain('btn')
+    expect(smBtn.className).toContain('btn--sm_as_size')
+    expect(smBtn.className.includes('btn--lg_as_size')).toBeFalsy()
 
     const lgBtn = await screen.findByText('large button')
-    expect(lgBtn.className).toContain('Btn')
-    expect(lgBtn.className).toContain('Btn--lg_as_size')
-    expect(lgBtn.className.includes('Btn--sm_as_size')).toBeFalsy()
+    expect(lgBtn.className).toContain('btn')
+    expect(lgBtn.className).toContain('btn--lg_as_size')
+    expect(lgBtn.className.includes('btn--sm_as_size')).toBeFalsy()
   })
 
   it('should handle extension props properly', async () => {
@@ -107,18 +108,18 @@ describe('components classnames and props mapping', () => {
       </>
     )
     const btn = await screen.findByText('I am a button')
-    expect(btn.className).toContain('Btn')
+    expect(btn.className).toContain('btn')
     // Btn extends BaseBtn so it should have also BaseBtn class
-    expect(btn.className).toContain('BaseBtn')
-    // BaseBtn size is false whenever Btn size is falsy
-    expect(btn.className.includes('BaseBtn--size')).toBeFalsy()
+    expect(btn.className).toContain('base-btn')
+    // base-btn size is false whenever Btn size is falsy
+    expect(btn.className.includes('base-btn--size')).toBeFalsy()
 
     const btnWithSize = await screen.findByText('button with size')
-    expect(btnWithSize.className).toContain('Btn')
-    // Btn extends BaseBtn so it should have also BaseBtn class
-    expect(btnWithSize.className).toContain('BaseBtn')
-    expect(btnWithSize.className).toContain('Btn--lg_as_size')
-    // BaseBtn size is true whenever Btn size is truthy
-    expect(btnWithSize.className).toContain('BaseBtn--size')
+    expect(btnWithSize.className).toContain('btn')
+    // Btn extends base-btn so it should have also base-btn class
+    expect(btnWithSize.className).toContain('base-btn')
+    expect(btnWithSize.className).toContain('btn--lg_as_size')
+    // base-btn size is true whenever Btn size is truthy
+    expect(btnWithSize.className).toContain('base-btn--size')
   })
 })

@@ -2,7 +2,7 @@ import {
   findComponentKeys,
   findComponentPropsMap,
   checkRecursiveExtensions
-} from '../rcc-helper'
+} from '../classnames-parsers'
 
 const style = {
   Btn: 's1',

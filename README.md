@@ -59,13 +59,13 @@ import { toRCC, RCC } from 'rcc-loader/dist/rcc-core'
 import _style from './my-app.module.scss'
 
 export interface RootProps {
-  dark-Mode?: boolean
+  darkMode?: boolean
 }
 
 export interface BtnProps {
   size?: 'sm' | 'md' | 'lg'
 }
-// DeleteBtnProps extends BtnProps because we defined the class .DeleteBtn_ext_Btn
+// DeleteBtnProps extends BtnProps because we defined the class .delete-btn_ext_btn
 export interface DeleteBtnProps extends BtnProps {
   disabled?: boolean
 }
@@ -78,7 +78,7 @@ const cssComponents = toRCC(_style) as {
 
 export default cssComponents
 
-// the following line is used for caching purpose
+// the following line is used for caching purpose: to not generate the file again if nothing changed in the css file
 // ##hash## #eso #ext= #cn= #ofn
 ```
 
@@ -193,21 +193,29 @@ export const MyComponent = () => {
 
 ## Component Class.
 
-the rcc component comes from the root class definition. Each _component class_ should be defined in **PascalCase**.
+the rcc component comes from the root class definition. Each _component class_ will be transformed to a **PascalCase**.
 
 ```scss
-// correct definition
+// Root component
+.root {
+}
+
+// ItemWrapper component
+.item-wrapper {
+}
+// Note!!!
+// the following classes will create unexpected behaviour because they will have the same component name
+
+// ContentWrapper
+.content-wrapper {
+}
+// ContentWrapper
+.-content-wrapper {
+}
+// to avoid being confused, you can directly define your component class as a Pascal case
 .Root {
 }
-.Content {
-}
 .ItemWrapper {
-}
-// wrong definition
-// the following classes will be ignored
-.Content-Wrapper {
-}
-.-ContentWrapper {
 }
 ```
 
@@ -247,12 +255,12 @@ defining _component property class_ without specifying the component name at the
 .Item {
 }
 // the Wrapper and the Item component will both have the global props
-// $flex-center and $font-size-lg
+// $cn={flexCenter?: boolean; fontSizeLg?: boolean}
 ```
 
 ## ternary property class
 
-some times we define a bunch of classes and want to use only one at the time excluding other ones: A or B or C. to do so, we need to use the special key _**as**_
+some times we define a bunch of classes and want to use only one at the time excluding other ones: A or B or C. to do so, we need to use the special key **\_as\_**
 
 ```scss
 .--sm_as_font-size {
@@ -273,15 +281,15 @@ some times we define a bunch of classes and want to use only one at the time exc
 }
 
 // global ternary props
-// $font-size: 'sm' | 'lg'
+// fontSize?: 'sm' | 'lg'
 
 // Btn component own props
-// $color: 'green' | 'yellow'
+// color?: 'green' | 'yellow'
 ```
 
 ## Component class extension
 
-some time we just want to extends a class and overwrite other css properties. in this case, we should use the _**ext**_ key.
+some time we just want to extends a class and overwrite other css properties. in this case, we should use the **\_ext\_** key.
 
 ```scss
 .Btn {
@@ -375,14 +383,14 @@ our previous _my-app.module.scss_ file will generate the following content
 import _style from './my-app.module.scss'
 
 export interface ModuleStyle {
-  Root: string
-  'Root--dark-mode': string
+  root: string
+  'root--dark-mode': string
   Btn: string
-  'Btn--sm_as_size': string
-  'Btn--md_as_size': string
-  'Btn--lg_as_size': string
-  DeleteBtn: string
-  'DeleteBtn--disabled': string
+  'btn--sm_as_size': string
+  'btn--md_as_size': string
+  'btn--lg_as_size': string
+  'delete-btn': string
+  'delete-btn--disabled': string
 }
 
 export const style: ModuleStyle = _style as any

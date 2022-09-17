@@ -83,16 +83,3 @@ export const checkRecursiveExtensions = (
   })
   return true
 }
-
-export const prefixProxy = (rccs: any, prefix: { value: string }) => {
-  return new Proxy(rccs, {
-    set(_, prop, value) {
-      if (prop === '__prefix__' && typeof value === 'string') {
-        prefix.value = value
-        return true
-      }
-      console.warn('only __prefix__ attribute can be changed')
-      return false
-    }
-  })
-}

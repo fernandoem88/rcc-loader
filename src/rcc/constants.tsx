@@ -114,8 +114,8 @@ export const EMPTY_HTML_TAGS = {
   var: undefined,
   video: undefined,
   wbr: undefined,
-  webview: undefined,
-};
+  webview: undefined
+}
 
 export const EMPTY_SVG_TAGS = {
   animate: undefined,
@@ -172,5 +172,5 @@ export const EMPTY_SVG_TAGS = {
   textPath: undefined,
   tspan: undefined,
   use: undefined,
-  view: undefined,
-};
+  view: undefined
+}

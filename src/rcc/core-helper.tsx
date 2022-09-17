@@ -1,14 +1,12 @@
 import React from 'react'
 
 import { ComponentData, RCC } from '../typings'
-
-import { addHTMLTags } from './html-tags-helper'
+import { htmlTagsProxy, prefixProxy } from './proxy-helpers'
 import {
   checkRecursiveExtensions,
   findComponentKeys,
-  findComponentPropsMap,
-  prefixProxy
-} from './rcc-helper'
+  findComponentPropsMap
+} from './classnames-parsers'
 
 const toKebabCase = (str: string) =>
   str.replace(/^[a-z0-9]|-[a-z0-9]/g, (match) =>
@@ -53,19 +51,17 @@ export const toRCC = (style: any) => {
           }, '')
 
           return newClass ? finalClassName + ' ' + newClass : finalClassName
-        }, props.className || '')
+        }, '')
       }
 
       const store = {
         propsKeys: {} as { [$prop: string]: string[] },
-        emptyKeys: {},
         rootClassName: ''
       }
 
       const updateStore = (mapping: {}) => {
         const propsEntries = Object.entries(mapping)
         propsEntries.forEach(([$prop, dirtyClass]) => {
-          store.emptyKeys[$prop] = undefined
           store.propsKeys[$prop] = store.propsKeys[$prop] || []
           store.propsKeys[$prop].push(dirtyClass as string)
         })
@@ -92,24 +88,26 @@ export const toRCC = (style: any) => {
       // }
       // init()
 
-      const keysArray = Object.keys(store.propsKeys)
+      const PROPS_KEYS_ARR = Object.keys(store.propsKeys)
 
       const CSSComponent = React.forwardRef(function (props: any, ref) {
-        const { children, $cn, ...rest } = props
+        const { children, className, $cn, ...rest } = props
 
-        const classDeps = keysArray.map(
+        const classDeps = PROPS_KEYS_ARR.map(
           (k) => props.$cn?.[k]
         ) as React.DependencyList
 
-        const className = React.useMemo(
+        const computedClassName = React.useMemo(
           () => getComponentClassNames(props),
           classDeps
         )
 
+        const inputClassName = className ? className + ' ' : ''
+
         return (
           <Element
             {...rest}
-            className={`${store.rootClassName} ${className}`}
+            className={`${inputClassName}${store.rootClassName} ${computedClassName}`}
             ref={ref}
           >
             {children}
@@ -121,19 +119,19 @@ export const toRCC = (style: any) => {
       return CSSComponent
     }
 
-  const prefix = { value: 'S.' }
+  const prefixRef = { value: 'S.' }
 
   const rccs = Object.keys(componentsData).reduce((prev, componentName) => {
     return {
       ...prev,
-      [toKebabCase(componentName)]: addHTMLTags(
+      [toKebabCase(componentName)]: htmlTagsProxy(
         createComponentElement(componentName),
-        prefix
+        prefixRef
       )
     }
   }, {} as any)
 
-  return prefixProxy(rccs, prefix) as {
+  return prefixProxy(rccs, prefixRef) as {
     [Key: string]: RCC<any>
   }
 }
