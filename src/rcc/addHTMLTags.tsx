@@ -1,17 +1,13 @@
 import React from 'react'
-import { RCC, TaggedRCC } from '../typings'
+import { RCC } from '../typings'
 import { EMPTY_HTML_TAGS, EMPTY_SVG_TAGS } from './constants'
 
 const isHTMLTag = (tag: string) =>
   tag in EMPTY_HTML_TAGS || tag in EMPTY_SVG_TAGS
 
-export const addHTMLTags = <Props,>(
-  Component: RCC<Props>
-): RCC<Props> & {
-  [K in keyof JSX.IntrinsicElements]: TaggedRCC<Omit<Props, '$as'>, K>
-} => {
+export const addHTMLTags = <Props,>(Component: any): RCC<Props> => {
   if (typeof Proxy === 'undefined') {
-    return Component as any
+    return Component
   }
 
   return new Proxy(Component as any, {

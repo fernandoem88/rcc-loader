@@ -48,7 +48,7 @@ export interface ComponentData {
   propClassMapping: { [$prop: string]: string }
 }
 
-export type RCC<Props> = <
+export type NoTagRCC<Props> = <
   Tag extends ElementType = 'div' // keyof JSX.IntrinsicElements | React.FC = "div"
 >(
   props: Props & { $as?: Tag } & ComponentProps<Tag>
@@ -58,3 +58,7 @@ export type TaggedRCC<
   Props,
   Tag extends ElementType // keyof JSX.IntrinsicElements | React.FC
 > = (props: Props & ComponentProps<Tag>) => JSX.Element
+
+export type RCC<Props> = NoTagRCC<Props> & {
+  [K in keyof JSX.IntrinsicElements]: TaggedRCC<Omit<Props, '$as'>, K>
+}

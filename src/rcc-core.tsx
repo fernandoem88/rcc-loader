@@ -1,13 +1,12 @@
 import React from 'react'
-import { ComponentData, RCC as NoTagRCC, TaggedRCC } from './typings'
+import { ComponentData, RCC } from './typings'
 import { addHTMLTags } from './rcc/addHTMLTags'
 import {
   checkRecursiveExtensions,
   findComponentKeys,
-  findComponentPropsMap
-} from './rcc/regex-helper'
-
-// const IS_DEV = process.env.NODE_ENV === 'development'
+  findComponentPropsMap,
+  prefixProxy
+} from './rcc/rcc-helper'
 
 const getTag = ($as: string | { tag: any }) => {
   const tag = typeof $as === 'string' ? $as : 'tag' in $as ? $as.tag : $as
@@ -18,10 +17,9 @@ export const toRCC = (style: any) => {
   const search = Object.keys(style).join('\n') // multilines
 
   const componentsData = {} as { [ComponentName: string]: ComponentData }
-
   const componentsKeys = findComponentKeys(search)
-
   const globalClassNamesMap = findComponentPropsMap(search, '')
+
   // the default class is not a component property
   delete globalClassNamesMap.DEFAULT
   const defaultClassName = style['--DEFAULT'] ? style['--DEFAULT'] + ' ' : ''
@@ -89,15 +87,18 @@ export const toRCC = (style: any) => {
     // }
     // init()
 
+    const keysArray = Object.keys(store.propsKeys)
+
     const CSSComponent = React.forwardRef(function (props: any, ref) {
       const { children, $as = 'div', ...rest } = props
 
-      const className = getComponentClassNames(props)
+      const classDeps = keysArray.map((k) => props[k])
 
+      const className = React.useMemo(
+        () => getComponentClassNames(props),
+        classDeps
+      )
       const tag = getTag($as)
-      // const ktsRef = useRef<any>()
-      // ktsRef.current = ktsRef.current ?? getDataKts(componentName, $as, tag)
-
       const Element = tag
 
       return (
@@ -120,19 +121,5 @@ export const toRCC = (style: any) => {
     return { ...prev, [componentName]: createComponentElement(componentName) }
   }, {} as any)
 
-  return new Proxy(rccs, {
-    set(target, prop, prefix) {
-      if (prop === '__prefix__' && typeof prefix === 'string') {
-        Object.keys(target).forEach((key: any) => {
-          target[key].displayName = prefix + key
-        })
-        return true
-      }
-      return false
-    }
-  }) as { [Key: string]: RCC<any> }
-}
-
-export type RCC<Props> = NoTagRCC<Props> & {
-  [K in keyof JSX.IntrinsicElements]: TaggedRCC<Omit<Props, '$as'>, K>
+  return prefixProxy(rccs) as { [Key: string]: RCC<any> }
 }
