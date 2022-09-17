@@ -24,9 +24,7 @@ export const findComponentKeys = (globalSearch: string) => {
 }
 
 const toCamelCase = (str: string) =>
-  str.replace(/^[a-z0-9]|-[a-z0-9]/g, (match) =>
-    match.toUpperCase().replace('-', '')
-  )
+  str.replace(/-[a-z0-9]/g, (match) => match.toUpperCase().replace('-', ''))
 
 /**
  *

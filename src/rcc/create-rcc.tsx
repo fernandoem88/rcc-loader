@@ -1,12 +1,14 @@
 import React from 'react'
-import { ComponentData, RCC } from './typings'
-import { addHTMLTags } from './rcc/addHTMLTags'
+
+import { ComponentData, RCC } from '../typings'
+
+import { addHTMLTags } from './html-tags-helper'
 import {
   checkRecursiveExtensions,
   findComponentKeys,
   findComponentPropsMap,
   prefixProxy
-} from './rcc/rcc-helper'
+} from './rcc-helper'
 
 const toKebabCase = (str: string) =>
   str.replace(/^[a-z0-9]|-[a-z0-9]/g, (match) =>
@@ -38,18 +40,19 @@ export const toRCC = (style: any) => {
     (componentName: string) =>
     (Element: any = 'div', prefix: string = 'S.') => {
       const getComponentClassNames = (props: any) => {
-        return Object.keys(props.$cn || {}).reduce((iiClassName, $prop) => {
-          const propValue = props[$prop]
+        return Object.keys(props.$cn || {}).reduce((finalClassName, $prop) => {
+          const propValue = props.$cn[$prop]
 
-          if (!propValue) return iiClassName
+          if (!propValue) return finalClassName
 
           const dirtyClasses = store.propsKeys[$prop]
+
           const newClass = dirtyClasses.reduce((jjClassName, dirtyClass) => {
             const cleanClass = style[dirtyClass.replace('[?]', propValue) || '']
             return cleanClass ? jjClassName + ' ' + cleanClass : jjClassName
           }, '')
 
-          return newClass ? iiClassName + ' ' + newClass : iiClassName
+          return newClass ? finalClassName + ' ' + newClass : finalClassName
         }, props.className || '')
       }
 
@@ -94,7 +97,9 @@ export const toRCC = (style: any) => {
       const CSSComponent = React.forwardRef(function (props: any, ref) {
         const { children, $cn, ...rest } = props
 
-        const classDeps = keysArray.map((k) => props[k])
+        const classDeps = keysArray.map(
+          (k) => props.$cn?.[k]
+        ) as React.DependencyList
 
         const className = React.useMemo(
           () => getComponentClassNames(props),

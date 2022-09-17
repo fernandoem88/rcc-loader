@@ -84,7 +84,7 @@ function createStringContent(arr = [], separator = '\n') {
 
 // css module types
 function createStyleType(className, prevContent = '') {
-  const [root] = className.split('--')
+  // const [root] = className.split('--')
   if (
     className !== '--DEFAULT' &&
     !className.includes('_ext_')

@@ -8,9 +8,10 @@ describe('parse and add className using addParsedClassNameData utility', () => {
   })
   it('should parse a simple className', () => {
     helpers.addParsedClassNameData('Btn--large-btn', components)
+
     expect(components.Btn).toBeDefined()
-    expect(components.Btn.props['$large-btn']).toBeDefined()
-    expect(components.Btn.classNamesPropsMapping['$large-btn']).toEqual(
+    expect(components.Btn.props.largeBtn).toBeDefined()
+    expect(components.Btn.classNamesPropsMapping.largeBtn).toEqual(
       'Btn--large-btn'
     )
   })
@@ -20,12 +21,12 @@ describe('parse and add className using addParsedClassNameData utility', () => {
     helpers.addParsedClassNameData('Btn--lg_as_size', components)
 
     expect(components.Btn).toBeDefined()
-    expect(components.Btn.props['$size']).toBeDefined()
-    expect(components.Btn.classNamesPropsMapping['$size']).toBeDefined()
-    expect(components.Btn.classNamesPropsMapping.$size.sm).toEqual(
+    expect(components.Btn.props.size).toBeDefined()
+    expect(components.Btn.classNamesPropsMapping.size).toBeDefined()
+    expect(components.Btn.classNamesPropsMapping.size.sm).toEqual(
       'Btn--sm_as_size'
     )
-    expect(components.Btn.classNamesPropsMapping.$size.lg).toEqual(
+    expect(components.Btn.classNamesPropsMapping.size.lg).toEqual(
       'Btn--lg_as_size'
     )
   })

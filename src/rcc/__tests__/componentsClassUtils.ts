@@ -2,7 +2,7 @@ import {
   findComponentKeys,
   findComponentPropsMap,
   checkRecursiveExtensions
-} from '../regex-helper'
+} from '../rcc-helper'
 
 const style = {
   Btn: 's1',
@@ -28,13 +28,13 @@ describe('css module style parser utils', () => {
 
   it('should parse props properly for a given component', () => {
     const btnProps = findComponentPropsMap(search, 'Btn')
-    expect(btnProps['large-size']).toBeDefined()
-    expect(btnProps['small-size']).toBeDefined()
-    expect(btnProps['bg-color']).toBeUndefined()
+    expect(btnProps['largeSize']).toBeDefined()
+    expect(btnProps['smallSize']).toBeDefined()
+    expect(btnProps['bgColor']).toBeUndefined()
 
     const deleteBtnProps = findComponentPropsMap(search, 'DeleteBtn')
-    expect(deleteBtnProps['bg-color']).toBeDefined()
-    expect(deleteBtnProps['small-size']).toBeUndefined()
+    expect(deleteBtnProps['bgColor']).toBeDefined()
+    expect(deleteBtnProps['smallSize']).toBeUndefined()
   })
 
   it('should check recursive extension for the Btn component', () => {

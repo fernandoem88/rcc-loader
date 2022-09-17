@@ -1,6 +1,7 @@
 import React from 'react'
 import { render, screen } from '@testing-library/react'
-import { createRccHelper } from '../../rcc-core'
+import { toRCC } from '../create-rcc'
+import { RCC } from '../../typings'
 const styleArr = [
   '--DEFAULT',
   'Wrapper',
@@ -20,7 +21,7 @@ const styleArr = [
 ]
 
 interface GlobalProps {
-  '$font-size'?: 'fs-12px' | 'fs-15px'
+  fontSize?: 'fs-12px' | 'fs-15px'
 }
 
 describe('components classnames and props mapping', () => {
@@ -28,41 +29,31 @@ describe('components classnames and props mapping', () => {
     return { ...prev, [key]: key }
   }, {} as { [key: string]: string })
 
-  const createRCC = createRccHelper(style, { prefix: 'S.' })
-  const S = {
-    Wrapper: createRCC<{ 'dark-mode'?: boolean } & GlobalProps>('Wrapper'),
-    Btn: createRCC<{ $size?: 'sm' | 'lg' } & GlobalProps>('Btn'),
-    DeleteBtn: createRCC<{ 'border-radius-2px'?: boolean } & GlobalProps>(
-      'DeleteBtn'
-    )
+  const S = toRCC(style as any) as {
+    Wrapper: RCC<{ darkMode?: boolean } & GlobalProps>
+    Btn: RCC<{ size?: 'sm' | 'lg' } & GlobalProps>
+    DeleteBtn: RCC<{ borderRadius2px?: boolean } & GlobalProps>
   }
   it('should render Wrapper component with the correct classname', async () => {
-    render(<S.Wrapper>I am a wrapper</S.Wrapper>)
+    render(<S.Wrapper.div>I am a wrapper</S.Wrapper.div>)
     const el = await screen.findByText('I am a wrapper')
     expect(el.className).toContain('Wrapper')
     expect(el.tagName).toBe('DIV')
   })
 
   it('should render Wrapper component as a span element', async () => {
-    render(
-      <>
-        <S.Wrapper $as='span'>I am a wrapper</S.Wrapper>
-        <S.Wrapper.span>I am a proxy</S.Wrapper.span>
-      </>
-    )
-    const el = await screen.findByText('I am a wrapper')
-    expect(el.tagName).toBe('SPAN')
+    render(<S.Wrapper.span>I am a span</S.Wrapper.span>)
 
-    const proxyEl = await screen.findByText('I am a proxy')
-    expect(proxyEl.className).toContain('Wrapper')
-    expect(proxyEl.tagName).toBe('SPAN')
+    const el = await screen.findByText('I am a span')
+    expect(el.className).toContain('Wrapper')
+    expect(el.tagName).toBe('SPAN')
   })
 
   it('should map Wrapper components props properly', async () => {
     render(
       <>
-        <S.Wrapper $dark-mode>dark mode</S.Wrapper>
-        <S.Wrapper $dark-mode={false}>no dark mode</S.Wrapper>
+        <S.Wrapper.div $cn={{ darkMode: true }}>dark mode</S.Wrapper.div>
+        <S.Wrapper.div>no dark mode</S.Wrapper.div>
       </>
     )
     const darkModeEl = await screen.findByText('dark mode')
@@ -77,8 +68,8 @@ describe('components classnames and props mapping', () => {
   it('should handle global props properly', async () => {
     render(
       <>
-        <S.Wrapper $font-size='fs-12px'>font 12</S.Wrapper>
-        <S.Wrapper $font-size='fs-15px'>font 15</S.Wrapper>
+        <S.Wrapper.div $cn={{ fontSize: 'fs-12px' }}>font 12</S.Wrapper.div>
+        <S.Wrapper.div $cn={{ fontSize: 'fs-15px' }}>font 15</S.Wrapper.div>
       </>
     )
     const font12El = await screen.findByText('font 12')
@@ -93,8 +84,8 @@ describe('components classnames and props mapping', () => {
   it('should handle ternary class props properly', async () => {
     render(
       <>
-        <S.Btn.button $size='sm'>small button</S.Btn.button>
-        <S.Btn.button $size='lg'>large button</S.Btn.button>
+        <S.Btn.button $cn={{ size: 'sm' }}>small button</S.Btn.button>
+        <S.Btn.button $cn={{ size: 'lg' }}>large button</S.Btn.button>
       </>
     )
     const smBtn = await screen.findByText('small button')
@@ -112,7 +103,7 @@ describe('components classnames and props mapping', () => {
     render(
       <>
         <S.Btn.button>I am a button</S.Btn.button>
-        <S.Btn.button $size='lg'>button with size</S.Btn.button>
+        <S.Btn.button $cn={{ size: 'lg' }}>button with size</S.Btn.button>
       </>
     )
     const btn = await screen.findByText('I am a button')
