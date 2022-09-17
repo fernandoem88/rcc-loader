@@ -1,4 +1,4 @@
-import { ComponentProps, ElementType } from 'react'
+import { ComponentProps, ElementType, Props } from 'react'
 // import { StringOptions } from 'sass'
 
 // export interface BaseOptions {
@@ -48,17 +48,10 @@ export interface ComponentData {
   propClassMapping: { [$prop: string]: string }
 }
 
-export type NoTagRCC<Props> = <
-  Tag extends ElementType = 'div' // keyof JSX.IntrinsicElements | React.FC = "div"
->(
-  props: Props & { $as?: Tag } & ComponentProps<Tag>
+export type RCCElement<Props, Tag extends ElementType = 'div'> = (
+  props: Props & ComponentProps<Tag>
 ) => JSX.Element
 
-export type TaggedRCC<
-  Props,
-  Tag extends ElementType // keyof JSX.IntrinsicElements | React.FC
-> = (props: Props & ComponentProps<Tag>) => JSX.Element
-
-export type RCC<Props> = NoTagRCC<Props> & {
-  [K in keyof JSX.IntrinsicElements]: TaggedRCC<Omit<Props, '$as'>, K>
+export type RCC<Props> = {
+  [K in keyof JSX.IntrinsicElements]: RCCElement<Props, K>
 }

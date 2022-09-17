@@ -23,6 +23,11 @@ export const findComponentKeys = (globalSearch: string) => {
   return componentsKeys
 }
 
+const toCamelCase = (str: string) =>
+  str.replace(/^[a-z0-9]|-[a-z0-9]/g, (match) =>
+    match.toUpperCase().replace('-', '')
+  )
+
 /**
  *
  * @param globalSearch
@@ -49,13 +54,13 @@ export const findComponentPropsMap = (
 
   const propsMap: { [$prop: string]: string } = {}
 
-  globalSearch.replace(reg, (...args) => {
-    const [, prefix, mainClass = '', prop] = args
-    const [tValue, $tProp] = prop.split('_as_')
-    const isTernary = prop.indexOf('_as_') !== -1
-    const $prop = isTernary ? $tProp : prop
-    const placeholder = isTernary ? prop.replace(tValue, '[?]') : prop
-    propsMap[$prop] = `${prefix}${mainClass}${placeholder}`
+  globalSearch.replace(reg, (...classParts) => {
+    const [, prefix, mainClass = '', suffix] = classParts
+    const [tValue, tProp] = suffix.split('_as_')
+    const isTernary = suffix.indexOf('_as_') !== -1
+    const $prop = isTernary ? tProp : suffix
+    const placeholder = isTernary ? suffix.replace(tValue, '[?]') : suffix
+    propsMap[toCamelCase($prop)] = `${prefix}${mainClass}${placeholder}`
     return ''
   })
 
@@ -81,13 +86,11 @@ export const checkRecursiveExtensions = (
   return true
 }
 
-export const prefixProxy = (rccs: any) => {
+export const prefixProxy = (rccs: any, prefix: { value: string }) => {
   return new Proxy(rccs, {
-    set(target, prop, prefix) {
-      if (prop === '__prefix__' && typeof prefix === 'string') {
-        Object.keys(target).forEach((key: any) => {
-          target[key].displayName = prefix + key
-        })
+    set(_, prop, value) {
+      if (prop === '__prefix__' && typeof value === 'string') {
+        prefix.value = value
         return true
       }
       console.warn('only __prefix__ attribute can be changed')

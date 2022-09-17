@@ -24,14 +24,6 @@ function addParsedClassNameData(className, components) {
     return
   }
 
-  if (componentName.includes('-')) {
-    delete components[componentName]
-    console.warn(
-      `component name cannot contain dashes: ${componentName} will be ignored`
-    )
-    return
-  }
-
   components[componentName] = components[componentName] || {
     ...getEmptyComponentData()
   }
@@ -52,7 +44,7 @@ function addParsedClassNameData(className, components) {
       // don't do nothing
     } else if (isTernary) {
       const [ternaryValue, ternaryKey] = propKey.split('_as_')
-      const $prop = `$${ternaryKey}`
+      const $prop = toCamelCase(ternaryKey)
       const prevValues = componentProps[$prop] || ''
       const separator = prevValues ? ' | ' : ''
       componentProps[$prop] = `${prevValues}${separator}'${ternaryValue}'`
@@ -61,7 +53,7 @@ function addParsedClassNameData(className, components) {
 
       classNamesPropsMapping[$prop][ternaryValue] = memoKey
     } else {
-      const $prop = `$${propKey}`
+      const $prop = toCamelCase(propKey)
       componentProps[$prop] = 'boolean'
       classNamesPropsMapping[$prop] = memoKey
     }
@@ -90,6 +82,7 @@ function createStringContent(arr = [], separator = '\n') {
   return arr.join(separator)
 }
 
+// css module types
 function createStyleType(className, prevContent = '') {
   const [root] = className.split('--')
   if (
@@ -103,27 +96,7 @@ function createStyleType(className, prevContent = '') {
   }
   return prevContent
 }
-/*
-function getBaseComponentsDefinition(components) {
-  return Object.entries(components).reduce((prevContentDefinition, entry) => {
-    const [componentName, componentData] = entry
-    const { props, classNamesPropsMapping, hasProps } = componentData
 
-    if (!hasProps) return prevContentDefinition
-
-    const propsContent = getComponentPropertiesDef(
-      props,
-      classNamesPropsMapping
-    )
-
-    const lastNewLine = propsContent ? '\n' : ''
-    const prevContent = prevContentDefinition
-      ? `${prevContentDefinition}\n\n`
-      : ''
-    return `${prevContent}const ${componentName} = (p: {${propsContent}}) => (<RCCElement {...p} rcc="${componentName}" />)${lastNewLine}`
-  }, '')
-}
-*/
 function getClassInterfacesDefinition(components) {
   return Object.entries(components).reduce((prevInterfaceDef, entry) => {
     const [componentName, componentData] = entry
@@ -139,14 +112,16 @@ function getClassInterfacesDefinition(components) {
 
     let extensionString = Array.from(extensions)
       .filter((ext) => !!components[ext]?.hasProps)
-      .map((extName) => `${extName}Props`)
+      .map((extName) => `${toKebabCase(extName)}Props`)
       .join(', ')
     if (extensionString.trim()) {
       extensionString = `extends ${extensionString} `
     }
     const lastNewLine = propsContent ? '\n' : ''
     const firstNewLine = prevInterfaceDef ? '\n\n' : ''
-    return `${prevInterfaceDef}${firstNewLine}export interface ${componentName}Props ${extensionString}{${propsContent}${lastNewLine}}`
+    return `${prevInterfaceDef}${firstNewLine}export interface ${toKebabCase(
+      componentName
+    )}Props ${extensionString}{${propsContent}${lastNewLine}}`
   }, '')
 }
 
@@ -173,8 +148,8 @@ function getComponentPropertiesDef(props, classNamesPropsMapping) {
   const propsContent = Object.entries(props)
     .map((propEntry) => {
       const [propKey, propType] = propEntry
-      const quoteKey = propKey.includes('-') ? `"${propKey}"` : propKey
-      return `\n  ${quoteKey}?: ${propType};`
+      const camelCaseProp = toCamelCase(propKey)
+      return `\n  ${camelCaseProp}?: ${propType};`
     })
     .join('')
   return propsContent
@@ -324,6 +299,14 @@ function getShouldCompileFromHash({ classNames, options, resource, rootDir }) {
   return [true, newHash]
 }
 
+const toKebabCase = (str) =>
+  str.replace(/^[a-z0-9]|-[a-z0-9]/g, (match) =>
+    match.toUpperCase().replace('-', '')
+  )
+
+const toCamelCase = (str) =>
+  str.replace(/-[a-z0-9]/g, (match) => match.toUpperCase().replace('-', ''))
+
 module.exports = {
   addParsedClassNameData,
   cleanCssString,
@@ -341,5 +324,6 @@ module.exports = {
   getHasProps,
   getHasOwnProps,
   getNewFileName,
-  getShouldCompileFromHash
+  getShouldCompileFromHash,
+  toKebabCase
 }

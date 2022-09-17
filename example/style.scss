@@ -1,6 +1,6 @@
 // use only defined classes in the default class
 .--DEFAULT {
-  :not(.Btn):not(.Selected) {
+  :not(.btn):not(.selected) {
     letter-spacing: 18px;
   }
 }
@@ -14,7 +14,7 @@
   font-size: 52px;
 }
 
-.Root {
+.root {
   height: 100%;
   width: 100%;
 
@@ -43,7 +43,7 @@
   }
 }
 
-.HeaderTitle {
+.header-title {
   text-align: center;
   padding: 15px;
   &--centered {
@@ -51,7 +51,7 @@
   }
 }
 
-.Content {
+.content {
   min-height: 120px;
   display: flex;
   flex-direction: column;
@@ -70,22 +70,22 @@
   border: solid 1px var(--border-color);
 }
 
-.Item {
+.item {
   color: gray;
   &:not(:first-child) {
     margin-left: 15px;
   }
 }
 
-.Selected {
+.selected {
   color: blue;
 }
 
-.BtnWrapper {
+.btn-wrapper {
   margin-top: 30px;
 }
 
-.Btn {
+.btn {
   padding: 20px;
   &--dark-mode {
     background: #888;
@@ -100,13 +100,8 @@
   color: red;
 }
 
-.ExpandBtn,
-.ExpandBtn_ext_Btn {
+.expanded-btn,
+.expanded-btn_ext_btn {
   text-align: center;
   margin-left: 4px;
-}
-
-.Likunza,
-.Likunza_ext_Btn {
-  color: red;
 }

@@ -97,14 +97,18 @@ function rccLoader(content, map, meta) {
         // updating component Data with hasProps
         componentData.hasProps = hasProps
 
-        const ownTypeDefinition = hasProps ? `${componentName}Props` : '{}'
+        const ownTypeDefinition = hasProps
+          ? `${helpers.toKebabCase(componentName)}Props`
+          : '{}'
         const gcpPropDefinition =
           hasProps && hasGlobalProps
             ? `GCP & ${ownTypeDefinition}`
             : hasGlobalProps
             ? 'GCP'
             : ownTypeDefinition
-        const jjContent = `${separator}${componentName}: RCC<${gcpPropDefinition}>`
+        const jjContent = `${separator}${helpers.toKebabCase(
+          componentName
+        )}: RCC<${gcpPropDefinition}>`
 
         return `${prev}${jjContent}`
       }, '')
