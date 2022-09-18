@@ -1,6 +1,6 @@
 import React from 'react'
 import { render, screen } from '@testing-library/react'
-import { toRCC } from '../core-helper'
+import { toRCC } from '../rcc-core'
 import { RCC } from '../../typings'
 
 const styleArr = [
@@ -52,10 +52,10 @@ describe('components classnames and props mapping', () => {
 
   it('should map Wrapper components props properly', async () => {
     render(
-      <>
+      <React.Fragment>
         <S.Wrapper.div $cn={{ darkMode: true }}>dark mode</S.Wrapper.div>
         <S.Wrapper.div>no dark mode</S.Wrapper.div>
-      </>
+      </React.Fragment>
     )
     const darkModeEl = await screen.findByText('dark mode')
     expect(darkModeEl.className).toContain('wrapper')
@@ -68,10 +68,10 @@ describe('components classnames and props mapping', () => {
 
   it('should handle global props properly', async () => {
     render(
-      <>
+      <React.Fragment>
         <S.Wrapper.div $cn={{ fontSize: 'fs-12px' }}>font 12</S.Wrapper.div>
         <S.Wrapper.div $cn={{ fontSize: 'fs-15px' }}>font 15</S.Wrapper.div>
-      </>
+      </React.Fragment>
     )
     const font12El = await screen.findByText('font 12')
     expect(font12El.className).toContain('--fs-12px_as_font-size')
@@ -84,10 +84,10 @@ describe('components classnames and props mapping', () => {
 
   it('should handle ternary class props properly', async () => {
     render(
-      <>
+      <React.Fragment>
         <S.Btn.button $cn={{ size: 'sm' }}>small button</S.Btn.button>
         <S.Btn.button $cn={{ size: 'lg' }}>large button</S.Btn.button>
-      </>
+      </React.Fragment>
     )
     const smBtn = await screen.findByText('small button')
     expect(smBtn.className).toContain('btn')
@@ -102,10 +102,10 @@ describe('components classnames and props mapping', () => {
 
   it('should handle extension props properly', async () => {
     render(
-      <>
+      <React.Fragment>
         <S.Btn.button>I am a button</S.Btn.button>
         <S.Btn.button $cn={{ size: 'lg' }}>button with size</S.Btn.button>
-      </>
+      </React.Fragment>
     )
     const btn = await screen.findByText('I am a button')
     expect(btn.className).toContain('btn')

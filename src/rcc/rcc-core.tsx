@@ -8,7 +8,7 @@ import {
   findComponentPropsMap
 } from './classnames-parsers'
 
-const toKebabCase = (str: string) =>
+const toPascalCase = (str: string) =>
   str.replace(/^[a-z0-9]|-[a-z0-9]/g, (match) =>
     match.toUpperCase().replace('-', '')
   )
@@ -103,7 +103,13 @@ export const toRCC = (style: any) => {
         )
 
         const inputClassName = className ? className + ' ' : ''
-
+        /*
+        return React.createElement(Element, {
+          ...rest,
+          ref,
+          className: `${inputClassName}${store.rootClassName} ${computedClassName}`
+        })
+         */
         return (
           <Element
             {...rest}
@@ -115,7 +121,7 @@ export const toRCC = (style: any) => {
         )
       })
 
-      CSSComponent.displayName = `${prefix}${toKebabCase(componentName)}`
+      CSSComponent.displayName = `${prefix}${toPascalCase(componentName)}`
       return CSSComponent
     }
 
@@ -124,7 +130,7 @@ export const toRCC = (style: any) => {
   const rccs = Object.keys(componentsData).reduce((prev, componentName) => {
     return {
       ...prev,
-      [toKebabCase(componentName)]: htmlTagsProxy(
+      [toPascalCase(componentName)]: htmlTagsProxy(
         createComponentElement(componentName),
         prefixRef
       )
