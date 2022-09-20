@@ -1,4 +1,4 @@
-const rccLoader = require('../dist/index')
+const rccLoader = require('../dist/loader')
 const path = require('path')
 const fs = require('fs')
 
@@ -14,6 +14,6 @@ rccLoader.bind({
   getOptions: () => ({
     enabled: true,
     fs,
-    exports: () => ({ $cn: true, rcc: true, style: false })
+    exports: () => ({ $cn: false, rcc: true, style: false })
   })
 })(content)

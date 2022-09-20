@@ -55,7 +55,7 @@ function rccLoader(content, map, meta) {
   let styleModuleType = ''
   classNamesArray.forEach((className) => {
     styleModuleType = helpers.createStyleType(className, styleModuleType)
-    if (exportableRCC) {
+    if (exportableRCC || exportableCN) {
       helpers.addParsedClassNameData(className, components)
     }
   })
@@ -133,7 +133,7 @@ function rccLoader(content, map, meta) {
     : ''
 
   const cnTtypeDef = exportableCN
-    ? '\ntype CN<P> = (props?: P & GCP) => string;\n'
+    ? '\ntype CN<P> = (props?: P) => string;\n'
     : ''
   const gcpTypeDef =
     exportableRCC || exportableCN ? '\n\ntype GCP = GlobalClassesProps;' : ''

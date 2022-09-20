@@ -49,7 +49,10 @@ export interface ComponentData {
 }
 
 export type RCCElement<Props, Tag extends ElementType = 'div'> = (
-  props: { $cn?: Props } & ComponentProps<Tag>
+  props: { $cn?: Props & { className?: string } } & Omit<
+    ComponentProps<Tag>,
+    'className'
+  >
 ) => JSX.Element
 
 export type RCC<Props> = {
