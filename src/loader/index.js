@@ -157,7 +157,10 @@ function rccLoader(content, map, meta) {
       : ''
 
   const rccImport = exportableRCC
-    ? `import { styleParser, RCC } from 'rcc-loader/dist/rcc-core';\n`
+    ? helpers.createStringContent([
+        `import { styleParser } from 'rcc-loader/dist/rcc-core';`,
+        `import { RCC } from 'rcc-loader/dist/src/typings';\n`
+      ])
     : ''
 
   const styleImport = `import _style from "./${resourceFileName}";`

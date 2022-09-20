@@ -10,10 +10,10 @@
   "description": "react css components loader - easy way to use css module in react components with typescript",
   "license": "MIT",
   "repository": "https://github.com/fernandoem88/rcc-loader",
-  "main": "dist/loader.umd.js",
+  "main": "dist/loader.js",
   "source": "src/rcc/rcc-core.tsx",
   "exports": {
-    "./loader": "./dist/loader.modern.mjs",
+    ".": "./dist/loader.js",
     "./core": "./dist/rcc-core.modern.mjs"
   },
   "engines": {
