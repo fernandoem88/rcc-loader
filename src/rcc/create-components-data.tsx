@@ -30,15 +30,20 @@ export const createComponentsData = (style: any) => {
   })
 
   const createComponentData = (componentName: string) => {
-    const getComponentClassNames = ($cn: { [$prop: string]: any } = {}) => {
-      const inputClassName = $cn.className ? $cn.className + ' ' : ''
+    const getComponentClassNames = ({
+      className: __cn,
+      ...$cn
+    }: { [$prop: string]: any } = {}) => {
       //
+      const inputClassName = __cn ? __cn + ' ' : ''
       return Object.keys($cn || {}).reduce((finalClassName, $prop) => {
         //
         const propValue = $cn[$prop]
         if (!propValue) return finalClassName
 
         const dirtyClasses = store.propsKeys[$prop]
+
+        if (!dirtyClasses) return finalClassName
 
         const newClass = dirtyClasses.reduce((jjClassName, dirtyClass) => {
           const cleanClass = style[dirtyClass.replace('[?]', propValue) || '']

@@ -13,8 +13,8 @@
   "main": "dist/loader.umd.js",
   "source": "src/rcc/rcc-core.tsx",
   "exports": {
-    "./loader": "./dist/loader.mjs",
-    "./core": "./dist/rcc-core.mjs"
+    "./loader": "./dist/loader.modern.mjs",
+    "./core": "./dist/rcc-core.modern.mjs"
   },
   "engines": {
     "node": ">=10"

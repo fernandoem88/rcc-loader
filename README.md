@@ -55,7 +55,7 @@ let's suppose to have the following scss file _my-app.module.scss_
 the loader will generate the following file _my-app.rcc.tsx_.
 
 ```tsx
-import { toRCC, RCC } from 'rcc-loader/dist/rcc-core'
+import { styleParser, RCC } from 'rcc-loader/dist/rcc-core'
 import _style from './my-app.module.scss'
 
 export interface RootProps {
@@ -70,7 +70,13 @@ export interface DeleteBtnProps extends BtnProps {
   disabled?: boolean
 }
 
-const cssComponents = toRCC(_style) as {
+export const $cn = styleParser(_style).$cn as {
+  Root: (props?: RootProps) => string
+  Btn: (props?: BtnProps) => string
+  DeleteBtn: (props?: DeleteBtnProps) => string
+}
+
+const cssComponents = styleParser(_style).rccs as {
   Root: RCC<RootProps>
   Btn: RCC<BtnProps>
   DeleteBtn: RCC<DeleteBtnProps>
@@ -164,14 +170,14 @@ const nextConfig = {
 }
 ```
 
-after setting up the config, we will first use the **toRCC** transformer in our react component. for example in _MyComponent.tsx_
+after setting up the config, we will first use the **styleParser** transformer in our react component. for example in _MyComponent.tsx_
 
 ```tsx
-import { toRCC } from 'rcc-loader/dist/rcc-core'
+import { styleParser } from 'rcc-loader/dist/rcc-core'
 import style from './my-style.module.scss'
 
 // S type is an index { [key: string]: Record<HtmlTag, RCC<any>> }
-const S = toRCC(style)
+const S = styleParser(style)
 
 export const MyComponent = () => {
   return <S.Root.div>Hello World</S.Root.div>

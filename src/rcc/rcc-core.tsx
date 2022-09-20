@@ -3,7 +3,7 @@ import { htmlTagsProxy, prefixProxy, toPascalCase } from './proxy-helpers'
 
 import { createComponentsData } from './create-components-data'
 
-export const styleCompiler = (style: any) => {
+export const styleParser = (style: any) => {
   const { createComponentData, componentsKeys } = createComponentsData(style)
 
   const prefixRef = { value: 'S.' }
@@ -14,7 +14,7 @@ export const styleCompiler = (style: any) => {
         createComponentData(componentName)
       return {
         $cn: {
-          ...prev,
+          ...prev.$cn,
           [toPascalCase(componentName)]: getComponentClassNames
         },
         rccs: {
@@ -30,7 +30,7 @@ export const styleCompiler = (style: any) => {
   )
 
   return {
-    $cn: rccsData.$cn,
+    $cn: rccsData.$cn as { [$prop: string]: any },
     rccs: prefixProxy(rccsData.rccs, prefixRef) as {
       [Key: string]: RCC<any>
     }

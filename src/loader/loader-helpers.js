@@ -107,7 +107,8 @@ function getClassInterfacesDefinition(components) {
 
     const propsContent = getComponentPropertiesDef(
       props,
-      classNamesPropsMapping
+      classNamesPropsMapping,
+      componentName === 'GlobalClasses'
     )
 
     let extensionString = Array.from(extensions)
@@ -144,7 +145,12 @@ function getComponentByName(components, componentName) {
   return component || getEmptyComponentData()
 }
 
-function getComponentPropertiesDef(props, classNamesPropsMapping) {
+function getComponentPropertiesDef(
+  props,
+  classNamesPropsMapping,
+  isGlobalClassName
+) {
+  const cn = isGlobalClassName ? '\n  className?: string;' : ''
   const propsContent = Object.entries(props)
     .map((propEntry) => {
       const [propKey, propType] = propEntry
@@ -152,7 +158,7 @@ function getComponentPropertiesDef(props, classNamesPropsMapping) {
       return `\n  ${camelCaseProp}?: ${propType};`
     })
     .join('')
-  return propsContent
+  return cn + propsContent
 }
 
 function getEmptyComponentData() {

@@ -72,8 +72,8 @@ function rccLoader(content, map, meta) {
     return content
   }
 
-  const hasGlobalProps = helpers.getHasGlobalProps(components)
-  components.GlobalClasses.hasProps = hasGlobalProps
+  // const hasGlobalProps = helpers.getHasGlobalProps(components)
+  components.GlobalClasses.hasProps = true // always with className
 
   const styleContent = exportableStyle
     ? helpers.createStringContent([
@@ -104,12 +104,8 @@ function rccLoader(content, map, meta) {
       const ownTypeDefinition = hasProps
         ? `${helpers.toKebabCase(componentName)}Props`
         : '{}'
-      const gcpPropDefinition =
-        hasProps && hasGlobalProps
-          ? `GCP & ${ownTypeDefinition}`
-          : hasGlobalProps
-          ? 'GCP'
-          : ownTypeDefinition
+      const gcpPropDefinition = hasProps ? `GCP & ${ownTypeDefinition}` : 'GCP'
+
       const jjContent = `${separator}${helpers.toKebabCase(
         componentName
       )}: ${type}<${gcpPropDefinition}>`
@@ -123,7 +119,8 @@ function rccLoader(content, map, meta) {
     ? helpers.createStringContent([
         `${rccNewLine}const cssComponents = data.rccs as {`,
         `  ${getItemsDefinition('RCC')}`,
-        '};'
+        '};',
+        '\nexport default cssComponents;'
       ])
     : ''
 
@@ -136,10 +133,10 @@ function rccLoader(content, map, meta) {
     : ''
 
   const cnTtypeDef = exportableCN
-    ? '\ntype CN<P> = (props: P) => string;\n'
+    ? '\ntype CN<P> = (props?: P & GCP) => string;\n'
     : ''
   const gcpTypeDef =
-    hasGlobalProps && exportableRCC ? '\n\ntype GCP = GlobalClassesProps;' : ''
+    exportableRCC || exportableCN ? '\n\ntype GCP = GlobalClassesProps;' : ''
 
   const componentsPropsDefinition =
     exportableRCC || exportableCN
@@ -153,15 +150,14 @@ function rccLoader(content, map, meta) {
     exportableRCC || exportableCN
       ? helpers.createStringContent([
           `${rccSeparator}${componentsPropsDefinition}${gcpTypeDef}${cnTtypeDef}`,
-          'const data = styleCompiler(_style);',
+          'const data = styleParser(_style);',
           $cnImplementation,
-          rccComponentsImplementation,
-          '\nexport default cssComponents;'
+          rccComponentsImplementation
         ])
       : ''
 
   const rccImport = exportableRCC
-    ? `import { styleCompiler, RCC } from 'rcc-loader/dist/rcc-core';\n`
+    ? `import { styleParser, RCC } from 'rcc-loader/dist/rcc-core';\n`
     : ''
 
   const styleImport = `import _style from "./${resourceFileName}";`

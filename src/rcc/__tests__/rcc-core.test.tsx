@@ -1,6 +1,6 @@
 import React from 'react'
 import { render, screen } from '@testing-library/react'
-import { styleCompiler } from '../rcc-core'
+import { styleParser } from '../rcc-core'
 import { RCC } from '../../typings'
 
 const styleArr = [
@@ -23,6 +23,7 @@ const styleArr = [
 
 interface GlobalProps {
   fontSize?: 'fs-12px' | 'fs-15px'
+  className?: string
 }
 
 describe('components classnames and props mapping', () => {
@@ -30,14 +31,39 @@ describe('components classnames and props mapping', () => {
     return { ...prev, [key]: key }
   }, {} as { [key: string]: string })
 
-  const S = styleCompiler(style as any).rccs as {
+  type CN<P> = (props?: P) => string
+
+  const data = styleParser(style as any)
+
+  console.log(data.$cn)
+
+  const $cn = data.$cn as {
+    Wrapper: CN<{ darkMode?: boolean } & GlobalProps>
+    Btn: CN<{ size?: 'sm' | 'lg' } & GlobalProps>
+    DeleteBtn: CN<
+      { borderRadius2px?: boolean } & GlobalProps & { size?: 'sm' | 'lg' }
+    >
+  }
+
+  const S = data.rccs as {
     Wrapper: RCC<{ darkMode?: boolean } & GlobalProps>
     Btn: RCC<{ size?: 'sm' | 'lg' } & GlobalProps>
     DeleteBtn: RCC<{ borderRadius2px?: boolean } & GlobalProps>
   }
+
+  it('should test $cn', () => {
+    //
+    expect($cn.Btn()).toContain('btn')
+    expect($cn.Btn()).toContain('base-btn')
+
+    expect($cn.Btn({ size: 'lg' })).toContain('btn--lg_as_size')
+    expect($cn.Btn({ className: 'pippo' })).toContain('pippo')
+  })
+
   it('should render Wrapper component with the correct classname', async () => {
     render(<S.Wrapper.div>I am a wrapper</S.Wrapper.div>)
     const el = await screen.findByText('I am a wrapper')
+
     expect(el.className).toContain('wrapper')
     expect(el.tagName).toBe('DIV')
   })
