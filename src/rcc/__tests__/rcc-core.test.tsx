@@ -1,6 +1,6 @@
 import React from 'react'
 import { render, screen } from '@testing-library/react'
-import { toRCC } from '../rcc-core'
+import { styleCompiler } from '../rcc-core'
 import { RCC } from '../../typings'
 
 const styleArr = [
@@ -30,7 +30,7 @@ describe('components classnames and props mapping', () => {
     return { ...prev, [key]: key }
   }, {} as { [key: string]: string })
 
-  const S = toRCC(style as any) as {
+  const S = styleCompiler(style as any).rccs as {
     Wrapper: RCC<{ darkMode?: boolean } & GlobalProps>
     Btn: RCC<{ size?: 'sm' | 'lg' } & GlobalProps>
     DeleteBtn: RCC<{ borderRadius2px?: boolean } & GlobalProps>

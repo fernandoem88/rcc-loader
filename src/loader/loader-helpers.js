@@ -182,14 +182,15 @@ function getExportTypes(resource, options) {
   if (typeof exports === 'function') {
     const paths = resource.split(pathSeparator)
     const fileName = paths.pop()
-    const { rcc = true, style = false } = exports(
-      fileName,
-      paths.join(pathSeparator)
-    )
-    return { rcc, style }
+    const {
+      rcc = false,
+      style = false,
+      $cn = false
+    } = exports(fileName, paths.join(pathSeparator))
+    return { rcc, style, $cn }
   }
-  const { rcc = true, style = false } = exports
-  return { rcc, style }
+  const { rcc = false, style = false, $cn = false } = exports
+  return { rcc, style, $cn }
 }
 
 function getHasGlobalProps(components) {
@@ -286,9 +287,10 @@ function getNewFileName(resource, options) {
 function getShouldCompileFromHash({ classNames, options, resource, rootDir }) {
   const esoHash = options._exportable.style ? '#stl_expo; ' : ''
   const rccHash = options._exportable.rcc ? '#rcc_expo; ' : ''
-  const cnHash = `#cn=${classNames.join('|')};`
+  const $cnHash = options._exportable.$cn ? '#$cn_expo; ' : ''
+  const classesHash = `#clases=${classNames.join('|')};`
   const outputFilenameHash = `#ofn=${options._outputFileName};`
-  const newHash = `##hash## ${rccHash}${esoHash}${cnHash}${outputFilenameHash}`
+  const newHash = `##hash## ${esoHash}${$cnHash}${rccHash}${classesHash}${outputFilenameHash}`
   if (fs.existsSync(options._outputFilePath)) {
     const fileContent = fs.readFileSync(options._outputFilePath, 'utf8')
     const oldHash = fileContent

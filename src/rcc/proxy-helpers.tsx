@@ -4,12 +4,17 @@ import { EMPTY_HTML_TAGS, EMPTY_SVG_TAGS } from './constants'
 const isHTMLTag = (tag: string) =>
   tag in EMPTY_HTML_TAGS || tag in EMPTY_SVG_TAGS
 
+export const toPascalCase = (str: string) =>
+  str.replace(/^[a-z0-9]|-[a-z0-9]/g, (match) =>
+    match.toUpperCase().replace('-', '')
+  )
+
 export const htmlTagsProxy = (
   createRCCWithTag: (tag: string, prefix: string) => React.FC,
   prefixRef: { value: string }
 ) => {
   if (typeof Proxy === 'undefined') {
-    return createRCCWithTag
+    return createRCCWithTag as any
   }
 
   return new Proxy({} as any, {

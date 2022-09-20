@@ -4,7 +4,7 @@
     "module": "esnext",
     "lib": ["dom", "esnext"],
     "moduleResolution": "node",
-    
+    "jsx": "react",
     "allowJs": true,
     "checkJs": false,
     "sourceMap": true,
@@ -28,6 +28,6 @@
     "isolatedModules": true,
     "noEmit": true
   },
-  "include": ["src"],
-  "exclude": ["node_modules", "dist", "example"]
+  "include": ["src", "example"],
+  "exclude": ["node_modules", "dist", "src/example"]
 }

@@ -10,7 +10,6 @@
   "description": "react css components loader - easy way to use css module in react components with typescript",
   "license": "MIT",
   "repository": "https://github.com/fernandoem88/rcc-loader",
-  "type": "module",
   "main": "dist/loader.umd.js",
   "source": "src/rcc/rcc-core.tsx",
   "exports": {
@@ -21,7 +20,7 @@
     "node": ">=10"
   },
   "scripts": {
-    "build": "microbundle ./src/loader/*.js ./src/rcc/*.tsx",
+    "build": "microbundle ./src/loader/*.js ./src/rcc/*.tsx --jsx React.createElement",
     "start": "microbundle watch",
     "prepare": "run-s build",
     "test": "run-s test:unit test:lint",
