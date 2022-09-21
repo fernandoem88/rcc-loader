@@ -30,7 +30,7 @@ export const styleParser = (style: any) => {
   )
 
   return {
-    $cn: rccsData.$cn as { [$prop: string]: any },
+    $cn: rccsData.$cn as { [key: string]: (props?: any) => string },
     rccs: prefixProxy(rccsData.rccs, prefixRef) as {
       [Key: string]: RCC<any>
     }

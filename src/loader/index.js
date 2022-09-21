@@ -25,6 +25,7 @@ function rccLoader(content, map, meta) {
   } = options._exportable
 
   if (!exportableRCC && !exportableStyle && !exportableCN) {
+    options._logger('rcc loader disabled')
     return content
   }
 
@@ -156,12 +157,13 @@ function rccLoader(content, map, meta) {
         ])
       : ''
 
-  const rccImport = exportableRCC
-    ? helpers.createStringContent([
-        `import { styleParser } from 'rcc-loader/dist/rcc-core';`,
-        `import { RCC } from 'rcc-loader/dist/src/typings';\n`
-      ])
-    : ''
+  const rccImport =
+    exportableRCC || exportableCN
+      ? helpers.createStringContent([
+          `import { styleParser } from 'rcc-loader/dist/rcc-core';`,
+          `import { RCC } from 'rcc-loader/dist/src/typings';\n`
+        ])
+      : ''
 
   const styleImport = `import _style from "./${resourceFileName}";`
 
@@ -171,5 +173,30 @@ function rccLoader(content, map, meta) {
   )
   return content
 }
+
+const compile = (filePath, rootContext, options) => {
+  const { enabled = true } = options
+  if (rootContext === false) {
+    console.log('please pass __dirname as rootContext params')
+    return
+  }
+  const resource = path.resolve(rootContext, filePath)
+  console.log('compiling resource ===>', resource)
+
+  const content = fs.readFileSync(resource, 'utf-8')
+  const thisCtx = {
+    resource,
+    rootContext,
+    getLogger: () => console.log,
+    getOptions: () => ({
+      ...options,
+      enabled,
+      fs: options.fs || fs
+    })
+  }
+
+  rccLoader.bind(thisCtx)(content)
+}
+rccLoader.compile = compile
 
 module.exports = rccLoader

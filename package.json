@@ -11,7 +11,7 @@
   "license": "MIT",
   "repository": "https://github.com/fernandoem88/rcc-loader",
   "main": "dist/loader.js",
-  "source": "src/rcc/rcc-core.tsx",
+  "source": "src/loader/index.js",
   "exports": {
     ".": "./dist/loader.js",
     "./core": "./dist/rcc-core.modern.mjs"
@@ -20,7 +20,7 @@
     "node": ">=10"
   },
   "scripts": {
-    "build": "microbundle ./src/loader/*.js ./src/rcc/*.tsx --jsx React.createElement",
+    "build": "microbundle ./src/loader/*.js ./src/rcc/*.tsx ./src/typings/index.d.ts --jsx React.createElement",
     "start": "microbundle watch",
     "prepare": "run-s build",
     "test": "run-s test:unit test:lint",
