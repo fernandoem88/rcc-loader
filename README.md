@@ -1,16 +1,12 @@
-# React css components loader (rcc-loader)
+# Typed css components loader (rcc-loader)
 
 [![NPM](https://img.shields.io/npm/v/rcc-loader.svg)](https://www.npmjs.com/package/rcc-loader)
 
-> This loader is built to generate types from an imported css module and map its classes into react components in order to use props instead of classNames.
+> This webpack loader is built to generate types from an imported css module and map its classes in order to use props instead of classNames.
 >
+> - **type definition for css module classNames**
 > - **fast classNames mapping**
 > - **easy to debug in React dev tools**
-> - **type definition for css module classNames**
-
-in case you are only looking for css module types definition, jump down to [the bottom of this page](#exporting-only-the-style-module).
-
-## Example
 
 let's suppose to have the following scss file _my-app.module.scss_
 
@@ -28,21 +24,18 @@ let's suppose to have the following scss file _my-app.module.scss_
   border: solid 1px black;
   border-radius: 3px;
   cursor: pointer;
-  /* _as_ is a special key to group classes to one unique property*/
-  &--sm_as_size {
+  &--sm_size {
     font-size: 10px;
   }
-  &--md_as_size {
+  &--md_size {
     font-size: 12px;
   }
-  &--lg_as_size {
+  &--lg_size {
     font-size: 14px;
   }
 }
 
-/* _ext_:  is a special key to tell that a component should extend another component behaviour. in the following case for example, .DeleteBtn will herit from .Btn */
-.delete-btn,
-.delete-btn_ext_btn {
+.delete-btn {
   background: red;
   color: white;
   &--disabled {
@@ -52,51 +45,94 @@ let's suppose to have the following scss file _my-app.module.scss_
 }
 ```
 
-the loader will generate the following file _my-app.rcc.tsx_.
+for a quick test, let's define a test.js file where we can use the **styleCompiler** utility.
+
+## exports option: style
+
+```js
+// test.js
+const { styleCompiler } = require('typed-css-module')
+styleCompiler('./my-app.module.scss', __dirname, { exports: { style: true } })
+```
+
+if we run _"node ./test.js"_ on the terminal, the following file _my-app.rcc.tsx_ will be generated.
 
 ```tsx
-import { styleParser, RCC } from 'rcc-loader/dist/rcc-core'
 import _style from './my-app.module.scss'
+
+export interface ModuleStyle {
+  root: string
+  'root--dark-mode': string
+  btn: string
+  'btn--sm_size': string
+  'btn--md_size': string
+  'btn--lg_size': string
+  'delete-btn': string
+  'delete-btn--disabled': string
+}
+
+export const style: ModuleStyle = _style as any
+
+// ##hash## this hash is used for caching purpose: to not generate this file again if there are no changes
+```
+
+## exports option: $cn
+
+now if we change the configuration options to "_export = { $cn: true }_", the generated file will export a utility functions factory (_$cn_) where all classes are already mapped.
+
+```js
+// test.js
+const { styleCompiler } = require('typed-css-module')
+styleCompiler('./my-app.module.scss', __dirname, { exports: { $cn: true } })
+```
+
+this configuration will generate the following file content
+
+```tsx
+import { styleParser } from 'rcc-loader/dist/rcc-core'
+import { RCC } from 'rcc-loader/dist/src/typings'
+import _style from './my-app.module.scss'
+
+export interface GlobalClasses {
+  className?: string
+}
 
 export interface RootProps {
   darkMode?: boolean
 }
 
 export interface BtnProps {
-  size?: 'sm' | 'md' | 'lg'
+  smSize?: boolean
+  mdSize?: boolean
+  lgSize?: boolean
 }
-// DeleteBtnProps extends BtnProps because we defined the class .delete-btn_ext_btn
-export interface DeleteBtnProps extends BtnProps {
+
+export interface DeleteBtnProps {
   disabled?: boolean
 }
 
-export const $cn = styleParser(_style).$cn as {
+type GCP = GlobalClasses
+
+const data = styleParser(_style)
+
+export const $cn = data.$cn as {
   Root: (props?: RootProps) => string
   Btn: (props?: BtnProps) => string
   DeleteBtn: (props?: DeleteBtnProps) => string
 }
 
-const cssComponents = styleParser(_style).rccs as {
-  Root: RCC<RootProps>
-  Btn: RCC<BtnProps>
-  DeleteBtn: RCC<DeleteBtnProps>
-}
-
-export default cssComponents
-
-// the following line is used for caching purpose: to not generate the file again if nothing changed in the css file
-// ##hash## #eso #ext= #cn= #ofn
+// ##hash##
 ```
 
 now we can use it in our main component _MyComponent.tsx_
 
 ```tsx
-import S from './my-app.rcc'
+import { $cn } from './my-app.rcc'
 
 const MyComponent = ({
   darkMode,
-  disabld,
-  disabled
+  disabled,
+  size
 }: {
   darkMode: boolean
   size?: 'sm' | 'md' | 'lg'
@@ -104,98 +140,107 @@ const MyComponent = ({
 }) => {
   return (
     // pass your classNames values to the "$cn" prop
-    <S.Root.div $cn={{ darkMode }}>
-      <S.Btn.button $cn={{ size }}>I am a varible size button</S.Btn.button>
-      <S.DeleteBtn.button $cn={{ size: 'lg', disabled }}>
-        I am a large Delete button
-      </S.DeleteBtn.button>
+    <div className={$cn.Root({ darkMode })}>
+      <button className={$cn.Btn({ className: 'extra class names' })}>
+        I am a button with .btn and .extra .class .names classes
+      </button>
+      <button className={$cn.Btn({ smSize: true })}>
+        I am a button with .btn and .sm-size classes
+      </button>
+      <button
+        className={$cn.btn({
+          smSize: size === 'sm',
+          mdSize: size === 'md',
+          disabled
+        })}
+      >
+        I am a button with variable size
+      </button>
+      // extending another class
+      <button
+        className={$cn.DeleteBtn({
+          disabled,
+          className: $cn.Btn({ smSize: true })
+        })}
+      >
+        DeleteBtn will also have Btn classes
+      </button>
+    </div>
+  )
+}
+```
+
+## exports option: rccs
+
+**rccs** stands for _react-css-components_ that are components that include already the **$cn** utility.
+let's change our test.js as follows
+
+```js
+// test.js
+const { styleCompiler } = require('typed-css-module')
+styleCompiler('./my-app.module.scss', __dirname, { exports: { rccs: true } })
+```
+
+now, if we run node ./test.js again, our generate file will look like follows:
+
+```tsx
+import { styleParser } from 'rcc-loader/dist/rcc-core'
+import { RCC } from 'rcc-loader/dist/src/typings'
+import _style from './my-app.module.scss'
+
+export interface GlobalClasses {
+  className?: string
+}
+
+export interface RootProps {
+  darkMode?: boolean
+}
+
+export interface BtnProps {
+  smSize?: boolean
+  mdSize?: boolean
+  lgSize?: boolean
+}
+
+export interface DeleteBtnProps {
+  disabled?: boolean
+}
+
+type GCP = GlobalClasses
+
+const data = styleParser(_style)
+
+const cssComponents = data.$rccs as {
+  Root: RCC<RootProps>
+  Btn: RCC<BtnProps>
+  DeleteBtn: RCC<DeleteBtnProps>
+}
+
+export default cssComponents
+
+// ##hash##
+```
+
+we can use it in some components like this
+
+```tsx
+import S from "./my-app.rcc"
+
+const MyApp = ({ darkMode, disabled }) => {
+  const cn1 = 'some other class names'
+  return (
+    <S.Root.div $cn={{ darkMode, className: cn1 }}>
+    I am a div with .root.dark-mode? and .some.other.class.names
+
+      <S.DeleBtn.button $cn={{ disabled }} >disabled delete btn</S.DeleteBtn.button>
     </S.Root.div>
   )
 }
 ```
 
-## how to Install
-
-```bash
-npm i -D rcc-loader
-```
-
-## use and options
-
-see default Configuration example with nextjs
-
-```ts
-const nextConfig = {
-  // ...
-  webpack: (
-    config,
-    { buildId, dev, isServer, defaultLoaders, nextRuntime, webpack }
-  ) => {
-    const rccLoaderRule = {
-      test: /\.module\.scss$/,
-      use: [
-        {
-          loader: 'rcc-loader',
-          options: {
-            /**
-             * enabled: (required) the loader should be enabled only in Dev environment.
-             * alternatively you can just, add the rccLoaderRule to webpack only in dev and set enabled to true by default
-             */
-            enabled: !!dev && isServer,
-            /**
-             * exports: (optional: { rcc: boolean, style: boolean} | Function).
-             * exports.rcc: true by default. set it to false in case you dont want to export rcc components.
-             * exports.style: false by default. set it to true in case you want to export ModuleStyle definitions.
-             *  you can use a function in case you want to set it only for given modules or name templates
-             * eg: (filename, fileDir) => /-eso\.module\.scss$/.test(filename) ? ({ style: true, rcc: false }) : undefined
-             * in this case, my-style-eso.module.scss for example will export only the ModuleStyle type
-             **/
-            exports: { rcc: true, style: false },
-            // getOutputFileName: (optional), to generate file with different name then the defualt one.
-            getOutputFileName: (filename, fileDir) =>
-              `awesomename-${filename.replace('.module.scss', '')}`,
-            // sassOptions: (optional) - sassOptions to pass to sass compiler
-            // => sass.compileString(cssString, sassOptions). for example to resolve absolute imports, etc.
-            sassOptions: {}
-          }
-        }
-      ]
-    }
-
-    config.module.rules = config.module.rules ?? []
-    config.module.rules.push(rccLoaderRule)
-
-    return config
-  }
-}
-```
-
-after setting up the config, we will first use the **styleParser** transformer in our react component. for example in _MyComponent.tsx_
-
-```tsx
-import { styleParser } from 'rcc-loader/dist/rcc-core'
-import style from './my-style.module.scss'
-
-// S type is an index { [key: string]: Record<HtmlTag, RCC<any>> }
-const S = styleParser(style)
-
-export const MyComponent = () => {
-  return <S.Root.div>Hello World</S.Root.div>
-}
-```
-
-after running the project, the _my-style.rcc.tsx_ file will be generated automatically so we can import the rcc components directly from it.
-
-```tsx
-// here S is fully typed
-import S from './my-style.rcc'
-
-export const MyComponent = () => {
-  return <S.Root.div>Hello World</S.Root.div>
-}
-```
-
 # ClassNames definition
+
+in case you decide to use [$cn](#exports-option-$cn) or [cssComponents](#exports-option-rccs), some special definition can be useful
 
 ## Component Class.
 
@@ -226,9 +271,10 @@ the rcc component comes from the root class definition. Each _component class_ w
 }
 ```
 
-## component property class (element a modifier)
+## component property class
 
-it should start with the component root name followed by double dashes. Each _component property_ should be written in **kebab-case** (eg: .Component--prop-one--prop-two)
+this is the element modifier. it should start with the component root name followed by double dashes. Each _component property_ can be written in **kebab-case** (eg: .Component--prop-one).
+however, its output will be in **camelCase**
 
 ```scss
 .Wrapper {
@@ -237,14 +283,15 @@ it should start with the component root name followed by double dashes. Each _co
   &--size {
   }
 }
-// the Wrapper component will then have $cn with 2 props
+// the $cn.Wrapper component will then have 2 props
 // darkMode: that comes from .Wrapper--dark-mode
 // size: that comes from .Wrapper--size
 ```
 
 ## global property class
 
-defining _component property class_ without specifying the component name at the begining of the class, the generated class will be available for all components in the rcc file
+defining _[component property class](#component-property-class)_ without the root component name can be a typo (in case of a missing "_&_" for example) at the begining of the class.
+however, we consider it as a modifier for all components
 
 ```scss
 .--flex-center {
@@ -261,23 +308,18 @@ defining _component property class_ without specifying the component name at the
 }
 .Item {
 }
-// the Wrapper and the Item component will both have the global props
-// $cn={flexCenter?: boolean; fontSizeLg?: boolean}
+// the $cn.Wrapper and the $cn.Item component will both have the global props
+// flexCenter?: boolean;
+// fontSizeLg?: boolean
 ```
+
+anyway, if you are using only _$cn_ and not _cssComponents_, you don't need this approach at all, since you can create just a _global-classes_ and reuse it in your component when needed.
 
 ## ternary property class
 
 some times we define a bunch of classes and want to use only one at the time excluding other ones: A or B or C. to do so, we need to use the special key **\_as\_**
 
 ```scss
-.--sm_as_font-size {
-  font-size: 12px;
-}
-
-.--lg_as_font-size {
-  font-size: 18px;
-}
-
 .Btn {
   &--red_as_color {
     color: green;
@@ -287,21 +329,33 @@ some times we define a bunch of classes and want to use only one at the time exc
   }
 }
 
-// global ternary props
-// fontSize?: 'sm' | 'lg'
-
 // Btn component own props
 // color?: 'green' | 'yellow'
 ```
 
+we can then use it in tsx file like this
+
+```tsx
+import S, { $cn } from './my-app.rcc'
+
+export const MyApp = ({ color }: { color: 'yellow' | 'green' }) => {
+  return <button className={$cn.Btn({ color })}>click me</button>
+  // or
+  return <S.Btn.button $cn={{ color }}>click me</S.Btn.button>
+}
+```
+
 ## Component class extension
 
-some time we just want to extends a class and overwrite other css properties. in this case, we should use the **\_ext\_** key.
+in case we want to extends a class and overwrite other css properties, we can use the **\_ext\_** key.
 
 ```scss
 .Btn {
   border-radius: 3px;
   box-shadow: 4px 4px grey;
+  &--disabled: {
+    pointer-events: none;
+  }
 }
 
 .PrimaryBtn,
@@ -310,6 +364,33 @@ some time we just want to extends a class and overwrite other css properties. in
   color: white;
 }
 // PrimaryBtn_ext_Btn tells us that the PrimaryBtn we just defined should extend the Btn previously defined
+```
+
+an example of use in a tsx file
+
+```tsx
+import S, { $cn } from './my-app.rcc'
+
+export const MyApp = ({ disabled }: { disabled?: boolean }) => {
+  // $cn
+  return <button className={$cn.PrimaryBtn({ disabled })}>click me</button>
+  // or
+  // cssComponents
+  return <S.PrimaryBtn.button $cn={{ disabled }}>click me</S.PrimaryBtn.button>
+}
+```
+
+also, in this case, if you are just using $cn instead of cssComponents, this approach is not necessary since you can achieve the same behaviour by nesting the extenion in your class name
+
+```tsx
+<button
+  className={$cn.Primary({
+    disabled,
+    className: $cn.Btn({ disabled: true })
+  })}
+>
+  Primary will also have Btn classes
+</button>
 ```
 
 Note: recursive extensions will throw an error to avoid infinte loop
@@ -326,7 +407,7 @@ Note: recursive extensions will throw an error to avoid infinte loop
 
 ## default css properties
 
-if for some reason, we want to have some default props for all components in the rcc context, we can use the **--DEFAULT** key.
+if for some particular reason, we want to have some default props for all components in the rcc context, we can use the **--DEFAULT** key.
 
 ```scss
 .--DEFAULT {
@@ -336,25 +417,47 @@ if for some reason, we want to have some default props for all components in the
 }
 ```
 
+## with component
+
+we can bind a component with some css coomponents like this
+
+```tsx
+import S from './my-app.rcc'
+import Wrapper from './Wrapper'
+
+// Root Wrapper will have .root class and all its relative modifier props
+const RootWrapper = S.Root.__with(Wrapper)
+
+const MyApp = ({ color }) => {
+  return <RootWrapper $cn={{ color }} />
+}
+```
+
 # Component name prefix
 
-by default your component in react dev tools will appear like this: **<S.Root.div />**.
+by default your _css component_ in react dev tools will appear like this: **<S.Root.div />**.
 you can set the rcc \_\_prefix\_\_ value to a more specific name, for example to have **<Card.Root.div />**
 
 ```tsx
-// here S is fully typed
+
 import Card from './my-style.rcc'
 
-(Card as any).__prefix__ = "Card."
+Card.__prefix__ = "Card."
 
 export const MyComponent = () => {
   return <Card.Root.div>Hello World</S.Root.div>
 }
 ```
 
-# Exporting only the style module
+## how to Install
 
-with the following configuration,
+```bash
+npm i -D typed-css-loader
+```
+
+## use and options
+
+see default Configuration example with nextjs
 
 ```ts
 const nextConfig = {
@@ -367,10 +470,31 @@ const nextConfig = {
       test: /\.module\.scss$/,
       use: [
         {
-          loader: 'rcc-loader',
+          loader: 'typed-css-loader',
           options: {
+            /**
+             * enabled: (required) the loader should be enabled only in Dev environment.
+             * alternatively you can just, add the rccLoaderRule to webpack only in dev and set enabled to true by default
+             */
             enabled: !!dev && isServer,
-            exports: (fileName, fileDir) => ({ rcc: false, style: true })
+            /**
+             * exports: (required: { rcc: boolean, style: boolean, $cn: boolean } | Function).
+             * at least one of the 3 parameters should be true
+             * exports.style: false by default. set it to true in case you want to export ModuleStyle definitions.
+             * exports.$cn: false by default. set it to true in case you want to export $cn utility.
+             * exports.rcc: false by default. set it to false in case you dont want to export rcc components.
+             
+             *  you can use a function in case you want to set different values for given files/name templates
+             * eg: (filename, fileDir) => /-eso\.module\.scss$/.test(filename) ? { style: true } : { $cn: true }
+             * in this case, my-style-eso.module.scss for example will export only the ModuleStyle type
+             **/
+            exports: { style: false, $cn: true, rcc: false },
+            // getOutputFileName: (optional), to generate file with different name then the defualt one.
+            getOutputFileName: (filename, fileDir) =>
+              `awesomename-${filename.replace('.module.scss', '')}`,
+            // sassOptions: (optional) - sassOptions to pass to sass compiler
+            // => sass.compileString(cssString, sassOptions). for example to resolve absolute imports, etc.
+            sassOptions: {}
           }
         }
       ]
@@ -384,23 +508,31 @@ const nextConfig = {
 }
 ```
 
-our previous _my-app.module.scss_ file will generate the following content
+after setting up the config, we will first use the **styleParser** transformer in our react component. for example in _MyComponent.tsx_
 
 ```tsx
-import _style from './my-app.module.scss'
+import { styleParser } from 'rcc-loader/dist/rcc-core'
+import style from './my-style.module.scss'
 
-export interface ModuleStyle {
-  root: string
-  'root--dark-mode': string
-  btn: string
-  'btn--sm_as_size': string
-  'btn--md_as_size': string
-  'btn--lg_as_size': string
-  'delete-btn': string
-  'delete-btn--disabled': string
+// S type is an index { [key: string]: Record<HtmlTag, RCC<any>> }
+const { rccs: S, $cn } = styleParser(style)
+
+export const MyComponent = () => {
+  return <div className={$cn.Root()}>Hello world</div>
+  // 0r
+  return <S.Root.div>Hello World again</S.Root.div>
 }
+```
 
-export const style: ModuleStyle = _style as any
+after running the project, the _my-style.rcc.tsx_ file will be generated automatically so we can import the rcc components directly from it.
+
+```tsx
+// here S is fully typed
+import S from './my-style.rcc'
+
+export const MyComponent = () => {
+  return <S.Root.div>Hello World</S.Root.div>
+}
 ```
 
 # License
