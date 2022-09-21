@@ -57,7 +57,7 @@ export type RCCElement<Props, Tag extends ElementType = 'div'> = (
 
 export type RCC<Props> = {
   [K in keyof JSX.IntrinsicElements]: RCCElement<Props, K>
-}
+} & { __with: <C extends ElementType>(Component: C) => RCCElement<Props, C> }
 
 export declare const styleParser: (style: any) => {
   $cn: {

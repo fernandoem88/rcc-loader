@@ -12,6 +12,8 @@ export const styleParser = (style: any) => {
     (prev, componentName) => {
       const { createCSSCompponent, getComponentClassNames } =
         createComponentData(componentName)
+
+      ;(createCSSCompponent as any).__prefix__ = prefixRef
       return {
         $cn: {
           ...prev.$cn,

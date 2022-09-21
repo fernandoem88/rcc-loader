@@ -97,16 +97,23 @@ export const createComponentsData = (style: any) => {
         const { children, className, $cn, ...rest } = props
 
         const classDeps = PROPS_KEYS_ARR.map(
-          (k) => props.$cn?.[k]
+          (k) => $cn?.[k]
         ) as React.DependencyList
 
         const computedClassName = React.useMemo(
-          () => getComponentClassNames(props.$cn),
+          () => getComponentClassNames($cn),
+          // eslint-ignore-next-line react-hooks/exhaustive-deps
           classDeps
         )
 
+        const inputClassName = className ? className + ' ' : ''
+
         return (
-          <Element {...rest} className={computedClassName} ref={ref}>
+          <Element
+            {...rest}
+            className={inputClassName + computedClassName}
+            ref={ref}
+          >
             {children}
           </Element>
         )
@@ -115,6 +122,10 @@ export const createComponentsData = (style: any) => {
       CSSComponent.displayName = `${prefix}${toPascalCase(componentName)}`
       return CSSComponent
     }
+
+    const withCreator = createCSSCompponent as any
+    withCreator.__with = (component: any) =>
+      createCSSCompponent(component, withCreator.__prefix__.value)
 
     return {
       getComponentClassNames,
