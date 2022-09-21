@@ -1,6 +1,6 @@
 # Typed css components loader
 
-[![NPM](https://img.shields.io/npm/v/typed-css-loader.svg)](https://www.npmjs.com/package/typed-css-loader)
+[![NPM](https://img.shields.io/npm/v/typed-css-components.svg)](https://www.npmjs.com/package/typed-css-components)
 
 > This webpack loader is built to generate types from an imported css module and map its classes in order to use props instead of classNames.
 >
@@ -89,8 +89,8 @@ styleCompiler('./my-app.module.scss', __dirname, { exports: { $cn: true } })
 this configuration will generate the following file content
 
 ```tsx
-import { styleParser } from 'typed-css-loader/dist/rcc-core'
-import { RCC } from 'typed-css-loader/dist/src/typings'
+import { styleParser } from 'typed-css-components/dist/rcc-core'
+import { RCC } from 'typed-css-components/dist/src/typings'
 import _style from './my-app.module.scss'
 
 export interface GlobalClasses {
@@ -184,8 +184,8 @@ styleCompiler('./my-app.module.scss', __dirname, { exports: { rccs: true } })
 now, if we run node ./test.js again, our generate file will look like follows:
 
 ```tsx
-import { styleParser } from 'typed-css-loader/dist/rcc-core'
-import { RCC } from 'typed-css-loader/dist/src/typings'
+import { styleParser } from 'typed-css-components/dist/rcc-core'
+import { RCC } from 'typed-css-components/dist/src/typings'
 import _style from './my-app.module.scss'
 
 export interface GlobalClasses {
@@ -452,7 +452,7 @@ export const MyComponent = () => {
 ## how to Install
 
 ```bash
-npm i -D typed-css-loader
+npm i -D typed-css-components
 ```
 
 ## use and options
@@ -470,7 +470,7 @@ const nextConfig = {
       test: /\.module\.scss$/,
       use: [
         {
-          loader: 'typed-css-loader',
+          loader: 'typed-css-components',
           options: {
             /**
              * enabled: (required) the loader should be enabled only in Dev environment.
@@ -511,7 +511,7 @@ const nextConfig = {
 after setting up the config, we will first use the **styleParser** transformer in our react component. for example in _MyComponent.tsx_
 
 ```tsx
-import { styleParser } from 'typed-css-loader/dist/rcc-core'
+import { styleParser } from 'typed-css-components/dist/rcc-core'
 import style from './my-style.module.scss'
 
 // S type is an index { [key: string]: Record<HtmlTag, RCC<any>> }
@@ -537,4 +537,4 @@ export const MyComponent = () => {
 
 # License
 
-MIT © [https://github.com/fernandoem88/typed-css-loader](https://github.com/fernandoem88/typed-css-loader)
+MIT © [https://github.com/fernandoem88/typed-css-components](https://github.com/fernandoem88/typed-css-components)
