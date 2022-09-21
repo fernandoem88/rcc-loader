@@ -1,6 +1,6 @@
 # Typed css components loader
 
-[![NPM](https://img.shields.io/npm/v/typed-css-components.svg)](https://www.npmjs.com/package/typed-css-components)
+[![NPM](https://img.shields.io/npm/v/typed-classnames.svg)](https://www.npmjs.com/package/typed-classnames)
 
 > This webpack loader is built to generate types from an imported css module and map its classes in order to use props instead of classNames.
 >
@@ -51,11 +51,11 @@ for a quick test, let's define a test.js file where we can use the **styleCompil
 
 ```js
 // test.js
-const { styleCompiler } = require('typed-css-module')
+const { styleCompiler } = require('typed-css-compponents')
 styleCompiler('./my-app.module.scss', __dirname, { exports: { style: true } })
 ```
 
-if we run _"node ./test.js"_ on the terminal, the following file _my-app.rcc.tsx_ will be generated.
+if we run **node ./test.js** on the terminal, the following file _my-app.rcc.tsx_ will be generated.
 
 ```tsx
 import _style from './my-app.module.scss'
@@ -78,19 +78,19 @@ export const style: ModuleStyle = _style as any
 
 ## exports option: $cn
 
-now if we change the configuration options to "_export = { $cn: true }_", the generated file will export a utility functions factory (_$cn_) where all classes are already mapped.
+now if we change the configuration options to "_exports: { $cn: true }_", the generated file will export a utility functions factory (**$cn**) where all classes are already mapped.
 
 ```js
 // test.js
-const { styleCompiler } = require('typed-css-module')
+const { styleCompiler } = require('typed-css-compponents')
 styleCompiler('./my-app.module.scss', __dirname, { exports: { $cn: true } })
 ```
 
 this configuration will generate the following file content
 
 ```tsx
-import { styleParser } from 'typed-css-components/dist/rcc-core'
-import { RCC } from 'typed-css-components/dist/src/typings'
+import { styleParser } from 'typed-classnames/dist/rcc-core'
+import { RCC } from 'typed-classnames/dist/src/typings'
 import _style from './my-app.module.scss'
 
 export interface GlobalClasses {
@@ -139,19 +139,16 @@ const MyComponent = ({
   disabled?: boolean
 }) => {
   return (
-    // pass your classNames values to the "$cn" prop
+    // pass our classNames values to the "$cn" prop
     <div className={$cn.Root({ darkMode })}>
       <button className={$cn.Btn({ className: 'extra class names' })}>
         I am a button with .btn and .extra .class .names classes
       </button>
-      <button className={$cn.Btn({ smSize: true })}>
-        I am a button with .btn and .sm-size classes
-      </button>
       <button
         className={$cn.btn({
+          disabled,
           smSize: size === 'sm',
-          mdSize: size === 'md',
-          disabled
+          mdSize: size === 'md'
         })}
       >
         I am a button with variable size
@@ -177,15 +174,15 @@ let's change our test.js as follows
 
 ```js
 // test.js
-const { styleCompiler } = require('typed-css-module')
+const { styleCompiler } = require('typed-css-compponents')
 styleCompiler('./my-app.module.scss', __dirname, { exports: { rccs: true } })
 ```
 
-now, if we run node ./test.js again, our generate file will look like follows:
+now, if we run node ./test.js again, our generated file will look like follows:
 
 ```tsx
-import { styleParser } from 'typed-css-components/dist/rcc-core'
-import { RCC } from 'typed-css-components/dist/src/typings'
+import { styleParser } from 'typed-classnames/dist/rcc-core'
+import { RCC } from 'typed-classnames/dist/src/typings'
 import _style from './my-app.module.scss'
 
 export interface GlobalClasses {
@@ -221,7 +218,7 @@ export default cssComponents
 // ##hash##
 ```
 
-we can use it in some components like this
+then we can use it like this
 
 ```tsx
 import S from "./my-app.rcc"
@@ -231,7 +228,6 @@ const MyApp = ({ darkMode, disabled }) => {
   return (
     <S.Root.div $cn={{ darkMode, className: cn1 }}>
     I am a div with .root.dark-mode? and .some.other.class.names
-
       <S.DeleBtn.button $cn={{ disabled }} >disabled delete btn</S.DeleteBtn.button>
     </S.Root.div>
   )
@@ -240,7 +236,7 @@ const MyApp = ({ darkMode, disabled }) => {
 
 # ClassNames definition
 
-in case you decide to use [$cn](#exports-option-$cn) or [cssComponents](#exports-option-rccs), some special definition can be useful
+in case we decide to use [$cn](#exports-option-$cn) or [cssComponents](#exports-option-rccs), some special definition can be useful
 
 ## Component Class.
 
@@ -313,7 +309,7 @@ however, we consider it as a modifier for all components
 // fontSizeLg?: boolean
 ```
 
-anyway, if you are using only _$cn_ and not _cssComponents_, you don't need this approach at all, since you can create just a _global-classes_ and reuse it in your component when needed.
+anyway, if we are using only _$cn_ and not _cssComponents_, we don't need this approach at all, since we can create just a _global-classes_ and reuse it in our component when needed.
 
 ## ternary property class
 
@@ -380,7 +376,7 @@ export const MyApp = ({ disabled }: { disabled?: boolean }) => {
 }
 ```
 
-also, in this case, if you are just using $cn instead of cssComponents, this approach is not necessary since you can achieve the same behaviour by nesting the extenion in your class name
+also, in this case, if we are just using $cn instead of cssComponents, this approach is not necessary since we can achieve the same behaviour by nesting the extenion in our class name
 
 ```tsx
 <button
@@ -435,8 +431,8 @@ const MyApp = ({ color }) => {
 
 # Component name prefix
 
-by default your _css component_ in react dev tools will appear like this: **<S.Root.div />**.
-you can set the rcc \_\_prefix\_\_ value to a more specific name, for example to have **<Card.Root.div />**
+by default our _css component_ in react dev tools will appear like this: **<S.Root.div />**.
+we can set the rcc \_\_prefix\_\_ value to a more specific name, for example to have **<Card.Root.div />**
 
 ```tsx
 
@@ -452,7 +448,7 @@ export const MyComponent = () => {
 ## how to Install
 
 ```bash
-npm i -D typed-css-components
+npm i -D typed-classnames
 ```
 
 ## use and options
@@ -470,21 +466,21 @@ const nextConfig = {
       test: /\.module\.scss$/,
       use: [
         {
-          loader: 'typed-css-components',
+          loader: 'typed-classnames',
           options: {
             /**
              * enabled: (required) the loader should be enabled only in Dev environment.
-             * alternatively you can just, add the rccLoaderRule to webpack only in dev and set enabled to true by default
+             * alternatively we can just, add the rccLoaderRule to webpack only in dev and set enabled to true by default
              */
             enabled: !!dev && isServer,
             /**
              * exports: (required: { rcc: boolean, style: boolean, $cn: boolean } | Function).
              * at least one of the 3 parameters should be true
-             * exports.style: false by default. set it to true in case you want to export ModuleStyle definitions.
-             * exports.$cn: false by default. set it to true in case you want to export $cn utility.
-             * exports.rcc: false by default. set it to false in case you dont want to export rcc components.
+             * exports.style: false by default. set it to true in case we want to export ModuleStyle definitions.
+             * exports.$cn: false by default. set it to true in case we want to export $cn utility.
+             * exports.rcc: false by default. set it to false in case we dont want to export rcc components.
              
-             *  you can use a function in case you want to set different values for given files/name templates
+             *  we can use a function in case we want to set different values for given files/name templates
              * eg: (filename, fileDir) => /-eso\.module\.scss$/.test(filename) ? { style: true } : { $cn: true }
              * in this case, my-style-eso.module.scss for example will export only the ModuleStyle type
              **/
@@ -511,7 +507,7 @@ const nextConfig = {
 after setting up the config, we will first use the **styleParser** transformer in our react component. for example in _MyComponent.tsx_
 
 ```tsx
-import { styleParser } from 'typed-css-components/dist/rcc-core'
+import { styleParser } from 'typed-classnames/dist/rcc-core'
 import style from './my-style.module.scss'
 
 // S type is an index { [key: string]: Record<HtmlTag, RCC<any>> }
@@ -537,4 +533,4 @@ export const MyComponent = () => {
 
 # License
 
-MIT © [https://github.com/fernandoem88/typed-css-components](https://github.com/fernandoem88/typed-css-components)
+MIT © [https://github.com/fernandoem88/typed-classnames](https://github.com/fernandoem88/typed-classnames)
